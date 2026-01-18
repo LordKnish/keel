@@ -34,20 +34,22 @@
   margin: 0;
 }
 
-/* Search placeholder (temporary) */
-.search-placeholder {
+/* Game result message */
+.game-result {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
-  background-color: var(--color-card-hidden);
+  background-color: var(--color-success);
   border-radius: var(--radius-md);
+  animation: cardReveal 0.4s ease-out forwards;
 }
 
-.search-placeholder__text {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  font-style: italic;
+.game-result__text {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: white;
+  text-align: center;
 }
 
 /* Tablet and up */
