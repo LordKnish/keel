@@ -15,7 +15,7 @@
 | 1 | Line Art Generation POC | Complete | 2/2 |
 | 2 | Data Source Evaluation | Complete | 1/1 |
 | 3 | Project Setup | Complete | 1/1 |
-| 4 | Ship Data Pipeline | Not Started | 0/0 |
+| 4 | Daily Game Generation | Planning | 1/0 |
 | 5 | Game UI Components | Not Started | 0/0 |
 | 6 | Game Logic | Not Started | 0/0 |
 | 7 | Polish & Share | Not Started | 0/0 |
@@ -36,6 +36,7 @@
 - 2026-01-18: Phase 2 plan 1 executed - 99 ships, 100% image download success
 - 2026-01-18: Phase 3 plan 1 created (01-PLAN.md) - Vite + React + TypeScript setup
 - 2026-01-18: Phase 3 plan 1 executed - full build pipeline working
+- 2026-01-18: Phase 4 plan 1 created (01-PLAN.md) - daily game generation
 
 ## Blockers
 
