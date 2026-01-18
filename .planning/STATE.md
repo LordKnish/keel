@@ -3,7 +3,7 @@
 ## Current Position
 
 **Milestone**: 1 (MVP)
-**Phase**: 3 (Project Setup)
+**Phase**: 4 (Daily Game Generation)
 **Status**: Complete
 
 ## Progress
@@ -15,7 +15,7 @@
 | 1 | Line Art Generation POC | Complete | 2/2 |
 | 2 | Data Source Evaluation | Complete | 1/1 |
 | 3 | Project Setup | Complete | 1/1 |
-| 4 | Daily Game Generation | Planning | 1/0 |
+| 4 | Daily Game Generation | Complete | 1/1 |
 | 5 | Game UI Components | Not Started | 0/0 |
 | 6 | Game Logic | Not Started | 0/0 |
 | 7 | Polish & Share | Not Started | 0/0 |
@@ -37,6 +37,7 @@
 - 2026-01-18: Phase 3 plan 1 created (01-PLAN.md) - Vite + React + TypeScript setup
 - 2026-01-18: Phase 3 plan 1 executed - full build pipeline working
 - 2026-01-18: Phase 4 plan 1 created (01-PLAN.md) - daily game generation
+- 2026-01-18: Phase 4 plan 1 executed - full generate command working (HMS Achilles)
 
 ## Blockers
 
@@ -62,29 +63,32 @@ None
 
 ## Notes
 
-**Phase 3 Complete!**
+**Phase 4 Complete!**
 
-Vite + React + TypeScript project fully set up:
-- All 10 tasks completed with per-task commits
-- Build pipeline: lint, typecheck, test, build all pass
-- CI/CD: GitHub Actions workflow + Vercel config
-- Dev experience: ESLint, Prettier, Vitest, path aliases
-
-**npm scripts available:**
-- `npm run dev` - Start dev server
-- `npm run build` - Production build
-- `npm run lint` - Run linter
-- `npm run typecheck` - Type check
-- `npm test` - Run tests
-
-**Next: Phase 4 - Daily Game Generation**
-
-Build `generate-game` command that:
-- Picks random eligible ship from Wikidata (>1950, has image, not used before)
-- Fetches full clue data (specs, context, trivia)
-- Downloads image → generates line art
-- Outputs game JSON ready for the UI
+Daily game generation command fully working:
+- All 9 tasks completed with per-task commits
+- Generates random ship from Wikidata (>1950, has image)
+- Fetches clue data (specs, context, Wikipedia trivia)
+- Downloads image and generates line art
+- Outputs `public/game-data.json`
 - Tracks used ships to avoid duplicates
+
+**Test run**: HMS Achilles (Q4353101) - Leander-class frigate, Chile
+
+**Generate commands:**
+```bash
+cd scripts/game-generator
+npm run generate           # Generate today's game
+npm run generate:ship-list # Generate autocomplete list
+```
+
+**Next: Phase 5 - Game UI Components**
+
+Build React components to display the game:
+- Silhouette display (Turn 1)
+- Ship search/autocomplete
+- Clue reveal components (Turns 2-5)
+- Turn indicator and guess history
 
 ---
 *Last updated: 2026-01-18*

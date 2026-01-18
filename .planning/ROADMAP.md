@@ -59,39 +59,23 @@
 
 ---
 
-### Phase 4: Daily Game Generation
+### Phase 4: Daily Game Generation ✅
 **Goal**: Build the generation command that produces a complete game for one ship
 
 **Why here**: Need game data before building UI that displays it.
 
 **Research**: No
 
-**Architecture**:
-1. Query Wikidata for random eligible ship (>1950, has image, not previously used)
-2. Fetch full data: specs (class, displacement, length, commissioned), context (nation, conflicts, status), trivia
-3. Download image → generate line art
-4. Output game JSON with all clues + assets
-5. Track used ships to avoid duplicates
-
 **Deliverables**:
-- `generate-game` command that outputs today's game data
-- Game data types (Ship, GameData, Clues)
-- Used ships tracking (JSON file)
-- Line art integration from Phase 1 scripts
+- ✅ `npm run generate` command that outputs today's game data
+- ✅ Game data types (GameData, SpecsClue, ContextClue)
+- ✅ Used ships tracking (JSON file)
+- ✅ Line art integration from Phase 1 scripts
+- ✅ Ship list generator for autocomplete
 
-**Output format**:
-```json
-{
-  "ship": { "id": "Q12345", "name": "USS Enterprise" },
-  "silhouette": "base64 or path",
-  "clues": {
-    "specs": { "class": "...", "displacement": "...", ... },
-    "context": { "nation": "...", "conflicts": [...], ... },
-    "trivia": "Famous for...",
-    "photo": "url or path"
-  }
-}
-```
+**Plans**: 1/1 complete
+
+**Test run**: HMS Achilles (Q4353101) - Leander-class frigate
 
 ---
 
@@ -153,7 +137,7 @@
 | 1 | Line Art Generation POC | Prove automated line art works | Yes | Complete (2 plans) |
 | 2 | Data Source Evaluation | Choose best data sources | Yes | Complete (1 plan) |
 | 3 | Project Setup | Vite/React/TS scaffolding | No | Complete (1 plan) |
-| 4 | Daily Game Generation | Generate one ship's game data | No | Not Started |
+| 4 | Daily Game Generation | Generate one ship's game data | No | Complete (1 plan) |
 | 5 | Game UI Components | Build visual components | No | Not Started |
 | 6 | Game Logic | Implement 5-turn game loop | No | Not Started |
 | 7 | Polish & Share | Mobile, share, finishing touches | No | Not Started |
