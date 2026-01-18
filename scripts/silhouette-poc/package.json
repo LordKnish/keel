@@ -6,7 +6,9 @@
   "scripts": {
     "build": "tsc",
     "generate": "ts-node --esm src/test-runner.ts",
-    "single": "ts-node --esm src/single.ts"
+    "single": "ts-node --esm src/single.ts",
+    "lineart": "ts-node --esm src/lineart-single.ts",
+    "lineart:test": "ts-node --esm src/lineart-runner.ts"
   },
   "keywords": [
     "silhouette",
