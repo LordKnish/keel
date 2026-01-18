@@ -734,25 +734,49 @@ export default async function handler(
     const usedIds = await getUsedShipIds();
     console.log(`\nUsed ships: ${usedIds.length}`);
 
-    // 2. Select random ship
-    console.log('\nSelecting random ship...');
-    const ship = await selectRandomShip(usedIds);
+    // 2. Select random ship with trivia (retry if no trivia found)
+    const MAX_RETRIES = 10;
+    const excludeIds = [...usedIds];
+    let ship: SelectedShip | null = null;
+    let clues: GameClues | null = null;
 
-    if (!ship) {
-      return response.status(500).json({
-        error: 'No eligible ships found',
-        message: 'Check query or reset used ships.',
-      });
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      console.log(`\nSelecting random ship (attempt ${attempt}/${MAX_RETRIES})...`);
+      ship = await selectRandomShip(excludeIds);
+
+      if (!ship) {
+        return response.status(500).json({
+          error: 'No eligible ships found',
+          message: 'Check query or reset used ships.',
+        });
+      }
+
+      console.log(`\nSelected: ${ship.name} (${ship.id})`);
+      console.log(`  Country: ${ship.country || 'Unknown'}`);
+      console.log(`  Class: ${ship.className || 'Unknown'}`);
+      console.log(`  Commissioned: ${ship.commissioned || 'Unknown'}`);
+
+      // 3. Fetch clues
+      console.log('\nFetching clue data...');
+      clues = await fetchClues(ship);
+
+      if (clues.trivia) {
+        console.log('  Trivia found, proceeding with this ship.');
+        break;
+      }
+
+      console.log('  No trivia found, trying another ship...');
+      excludeIds.push(ship.id);
+      ship = null;
+      clues = null;
     }
 
-    console.log(`\nSelected: ${ship.name} (${ship.id})`);
-    console.log(`  Country: ${ship.country || 'Unknown'}`);
-    console.log(`  Class: ${ship.className || 'Unknown'}`);
-    console.log(`  Commissioned: ${ship.commissioned || 'Unknown'}`);
-
-    // 3. Fetch clues
-    console.log('\nFetching clue data...');
-    const clues = await fetchClues(ship);
+    if (!ship || !clues) {
+      return response.status(500).json({
+        error: 'No ship with trivia found',
+        message: `Tried ${MAX_RETRIES} ships but none had trivia.`,
+      });
+    }
 
     // 4. Generate line art
     console.log('\nGenerating line art...');

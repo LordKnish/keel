@@ -145,6 +145,7 @@
   user-select: none;
   transform-origin: center center;
   transition: transform 0.1s ease-out;
+  background-color: white;
 }
 
 .image-zoom-modal__image-container--dragging .image-zoom-modal__image {
