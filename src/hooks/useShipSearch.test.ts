@@ -2,16 +2,16 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useShipSearch } from './useShipSearch';
 
-// Mock ship list data
-const mockShipList = {
+// Mock class list data (ship-list.json now contains classes)
+const mockClassList = {
   generatedAt: '2026-01-18T00:00:00Z',
   count: 5,
-  ships: [
-    { id: 'Q1', name: 'USS Enterprise' },
-    { id: 'Q2', name: 'USS Enterprise (CVN-65)' },
-    { id: 'Q3', name: 'HMS Victory' },
-    { id: 'Q4', name: 'Bismarck' },
-    { id: 'Q5', name: 'Yamato' },
+  classes: [
+    { id: 'class:fletcher-class-destroyer', name: 'Fletcher-class destroyer' },
+    { id: 'class:nimitz-class-carrier', name: 'Nimitz-class aircraft carrier' },
+    { id: 'class:type-23-frigate', name: 'Type 23 frigate' },
+    { id: 'class:bismarck-class-battleship', name: 'Bismarck-class battleship' },
+    { id: 'class:yamato-class-battleship', name: 'Yamato-class battleship' },
   ],
 };
 
@@ -19,7 +19,7 @@ describe('useShipSearch', () => {
   beforeEach(() => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve(mockShipList),
+      json: () => Promise.resolve(mockClassList),
     } as Response);
   });
 
@@ -32,7 +32,7 @@ describe('useShipSearch', () => {
     expect(result.current.isLoading).toBe(true);
   });
 
-  it('returns loading false after ship list loads', async () => {
+  it('returns loading false after class list loads', async () => {
     const { result } = renderHook(() => useShipSearch());
 
     await waitFor(() => {
@@ -86,20 +86,20 @@ describe('useShipSearch', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.search('E')).toEqual([]);
+    expect(result.current.search('F')).toEqual([]);
     expect(result.current.search('')).toEqual([]);
   });
 
-  it('search returns matching ships', async () => {
+  it('search returns matching classes', async () => {
     const { result } = renderHook(() => useShipSearch());
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    const results = result.current.search('Enterprise');
+    const results = result.current.search('Fletcher');
     expect(results.length).toBeGreaterThan(0);
-    expect(results[0]?.name).toContain('Enterprise');
+    expect(results[0]?.name).toContain('Fletcher');
   });
 
   it('search handles fuzzy matching', async () => {
@@ -112,28 +112,28 @@ describe('useShipSearch', () => {
     // Should find Bismarck even with a typo
     const results = result.current.search('Bismark');
     expect(results.length).toBeGreaterThan(0);
-    expect(results[0]?.name).toBe('Bismarck');
+    expect(results[0]?.name).toContain('Bismarck');
   });
 
   it('search returns max 8 results', async () => {
-    // Create a mock with more than 8 matching ships
+    // Create a mock with more than 8 matching classes
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
       json: () =>
         Promise.resolve({
           generatedAt: '2026-01-18T00:00:00Z',
           count: 10,
-          ships: [
-            { id: 'Q1', name: 'USS Ship 1' },
-            { id: 'Q2', name: 'USS Ship 2' },
-            { id: 'Q3', name: 'USS Ship 3' },
-            { id: 'Q4', name: 'USS Ship 4' },
-            { id: 'Q5', name: 'USS Ship 5' },
-            { id: 'Q6', name: 'USS Ship 6' },
-            { id: 'Q7', name: 'USS Ship 7' },
-            { id: 'Q8', name: 'USS Ship 8' },
-            { id: 'Q9', name: 'USS Ship 9' },
-            { id: 'Q10', name: 'USS Ship 10' },
+          classes: [
+            { id: 'class:type-1', name: 'Type 1 frigate' },
+            { id: 'class:type-2', name: 'Type 2 frigate' },
+            { id: 'class:type-3', name: 'Type 3 frigate' },
+            { id: 'class:type-4', name: 'Type 4 frigate' },
+            { id: 'class:type-5', name: 'Type 5 frigate' },
+            { id: 'class:type-6', name: 'Type 6 frigate' },
+            { id: 'class:type-7', name: 'Type 7 frigate' },
+            { id: 'class:type-8', name: 'Type 8 frigate' },
+            { id: 'class:type-9', name: 'Type 9 frigate' },
+            { id: 'class:type-10', name: 'Type 10 frigate' },
           ],
         }),
     } as Response);
@@ -144,7 +144,7 @@ describe('useShipSearch', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    const results = result.current.search('USS');
+    const results = result.current.search('Type');
     expect(results.length).toBeLessThanOrEqual(8);
   });
 });
