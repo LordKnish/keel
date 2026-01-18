@@ -654,7 +654,13 @@ async function generateLineArtFromUrl(imageUrl: string): Promise<string> {
   photon.invert(image);
 
   const lineArtBytes = image.get_bytes();
-  const lineArt = Buffer.from(lineArtBytes);
+
+  // 5. Flatten to white background (remove any transparency)
+  console.log('  Flattening to white background...');
+  const lineArt = await sharp(Buffer.from(lineArtBytes))
+    .flatten({ background: { r: 255, g: 255, b: 255 } })
+    .png()
+    .toBuffer();
 
   const timeMs = Date.now() - start;
   const { width, height } = await sharp(lineArt).metadata();
