@@ -3,7 +3,7 @@
 ## Current Position
 
 **Milestone**: 1 (MVP)
-**Phase**: 1 (Line Art Generation POC)
+**Phase**: 3 (Project Setup)
 **Status**: Complete
 
 ## Progress
@@ -13,8 +13,8 @@
 | Phase | Name | Status | Plans |
 |-------|------|--------|-------|
 | 1 | Line Art Generation POC | Complete | 2/2 |
-| 2 | Data Source Evaluation | Not Started | 0/0 |
-| 3 | Project Setup | Not Started | 0/0 |
+| 2 | Data Source Evaluation | Complete | 1/1 |
+| 3 | Project Setup | Complete | 1/1 |
 | 4 | Ship Data Pipeline | Not Started | 0/0 |
 | 5 | Game UI Components | Not Started | 0/0 |
 | 6 | Game Logic | Not Started | 0/0 |
@@ -31,6 +31,11 @@
 - 2026-01-18: Line art research completed (LINE-ART-RESEARCH.md)
 - 2026-01-18: Phase 1 plan 2 created (02-PLAN.md) - programmatic line art
 - 2026-01-18: Phase 1 plan 2 executed - 100% line art success rate
+- 2026-01-18: Phase 2 research completed (RESEARCH.md)
+- 2026-01-18: Phase 2 plan 1 created (01-PLAN.md) - Wikidata pipeline
+- 2026-01-18: Phase 2 plan 1 executed - 99 ships, 100% image download success
+- 2026-01-18: Phase 3 plan 1 created (01-PLAN.md) - Vite + React + TypeScript setup
+- 2026-01-18: Phase 3 plan 1 executed - full build pipeline working
 
 ## Blockers
 
@@ -46,26 +51,38 @@ None
 | Use OpenCV.js for line art | 1 | Bilateral filter + adaptive threshold not in Sharp |
 | Use line art over silhouettes | 1 | Better detail preservation, more distinguishing features |
 | Default parameters work | 1 | 100% success without tuning proves robustness |
+| Use Wikidata + Commons | 2 | Free SPARQL API, 70K+ ships, direct image links, no scraping |
+| Use tsx over ts-node | 2 | Better ESM module resolution |
+| Browser-like User-Agent | 2 | Wikimedia requires it for downloads |
+| Vite + React + TypeScript | 3 | Fast build, modern stack, Vercel-compatible |
+| Vitest over Jest | 3 | Native Vite integration, faster |
+| ESLint flat config | 3 | Modern config format, simpler setup |
+| Ships must be newer than 1950 | 4 | User requirement for modern vessels |
 
 ## Notes
 
-**Phase 1 Complete!**
+**Phase 3 Complete!**
 
-Both silhouettes and line art generation validated:
-- Silhouettes: 100% success, 1.56s avg
-- Line art: 100% success, 2.00s avg
+Vite + React + TypeScript project fully set up:
+- All 10 tasks completed with per-task commits
+- Build pipeline: lint, typecheck, test, build all pass
+- CI/CD: GitHub Actions workflow + Vercel config
+- Dev experience: ESLint, Prettier, Vitest, path aliases
 
-**Recommendation**: Use line art for the game. The additional detail makes ship identification more skill-based and engaging.
+**npm scripts available:**
+- `npm run dev` - Start dev server
+- `npm run build` - Production build
+- `npm run lint` - Run linter
+- `npm run typecheck` - Type check
+- `npm test` - Run tests
 
-**Pipeline summary:**
-1. @imgly background removal (validated in Plan 1)
-2. OpenCV.js bilateral filter (edge-preserving smoothing)
-3. OpenCV.js adaptive threshold (region-based binarization)
-4. Alpha mask + white background composition
+**Next: Phase 4 - Ship Data Pipeline**
 
-**Next: Phase 2 - Data Source Evaluation**
-- Evaluate Wikidata, Navypedia, NavBase, NVR
-- Need 1000+ ships with photos, specs, history
+Expand Wikidata pipeline to 1000+ ships with:
+- Ships newer than 1950 (user requirement)
+- Operator fallback for country data
+- Pre-generated line art for all ships
+- Image format filtering (JPEG only)
 
 ---
 *Last updated: 2026-01-18*

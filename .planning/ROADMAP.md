@@ -21,7 +21,7 @@
 
 ---
 
-### Phase 2: Data Source Evaluation
+### Phase 2: Data Source Evaluation ✅
 **Goal**: Determine best data source(s) for 1000+ ship database
 
 **Why here**: Need to know what data we're working with before building UI. Data availability shapes what clues we can show.
@@ -29,13 +29,20 @@
 **Research**: Yes - evaluate Wikidata, Navypedia, NavBase, NVR for coverage, API quality, image availability
 
 **Deliverables**:
-- Evaluation report on each source
-- Data fetching scripts for chosen source(s)
-- Sample dataset (50-100 ships) with all required fields
+- ✅ Evaluation report on each source (RESEARCH.md)
+- ✅ Data fetching scripts for chosen source (scripts/data-pipeline/)
+- ✅ Sample dataset (99 ships) with images, types, classes
+
+**Plans**: 1/1 complete (Wikidata pipeline)
+
+**Key findings**:
+- Wikidata: 70K+ ships, free SPARQL API, best option
+- Commons: All images freely licensed
+- Country coverage low (12.1%) - need operator fallback
 
 ---
 
-### Phase 3: Project Setup
+### Phase 3: Project Setup ✅
 **Goal**: Vite + React + TypeScript scaffolding with development tooling
 
 **Why here**: Foundation for all UI work. Quick phase - standard scaffolding.
@@ -43,9 +50,12 @@
 **Research**: No
 
 **Deliverables**:
-- Vite project with React + TypeScript
-- ESLint, Prettier, basic testing setup
-- CI/CD pipeline for Vercel deployment
+- ✅ Vite project with React 19 + TypeScript 5.9
+- ✅ ESLint (flat config), Prettier, Vitest testing
+- ✅ GitHub Actions CI workflow
+- ✅ Vercel deployment configuration
+
+**Plans**: 1/1 complete
 
 ---
 
@@ -56,11 +66,14 @@
 
 **Research**: No
 
+**Constraints**:
+- Ships must be newer than 1950
+
 **Deliverables**:
 - Ship data types/interfaces
 - Data fetching and processing scripts
 - JSON database with 1000+ ships
-- Pre-generated silhouettes for all ships
+- Pre-generated line art for all ships
 
 ---
 
@@ -116,12 +129,12 @@
 | # | Phase | Goal | Research | Status |
 |---|-------|------|----------|--------|
 | 1 | Line Art Generation POC | Prove automated line art works | Yes | Complete (2 plans) |
-| 2 | Data Source Evaluation | Choose best data sources | Yes | Not Started |
-| 3 | Project Setup | Vite/React/TS scaffolding | No | Not Started |
+| 2 | Data Source Evaluation | Choose best data sources | Yes | Complete (1 plan) |
+| 3 | Project Setup | Vite/React/TS scaffolding | No | Complete (1 plan) |
 | 4 | Ship Data Pipeline | Build 1000+ ship database | No | Not Started |
 | 5 | Game UI Components | Build visual components | No | Not Started |
 | 6 | Game Logic | Implement game loop | No | Not Started |
 | 7 | Polish & Share | Mobile, share, finishing touches | No | Not Started |
 
 ---
-*Last updated: 2026-01-18 after Phase 1 Plan 2 completion*
+*Last updated: 2026-01-18 after Phase 3 completion*
