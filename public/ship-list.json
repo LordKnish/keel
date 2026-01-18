@@ -1,0 +1,994 @@
+{
+  "generatedAt": "2026-01-18T16:19:56.034Z",
+  "count": 247,
+  "ships": [
+    {
+      "id": "Q18396308",
+      "name": "Admiral Essen"
+    },
+    {
+      "id": "Q18396307",
+      "name": "Admiral Grigorovich"
+    },
+    {
+      "id": "Q97204246",
+      "name": "Admiral Kharlamov"
+    },
+    {
+      "id": "Q274924",
+      "name": "Admiral Kuznetsov"
+    },
+    {
+      "id": "Q18543254",
+      "name": "Admiral Makarov"
+    },
+    {
+      "id": "Q4057857",
+      "name": "Admiral Zozulya"
+    },
+    {
+      "id": "Q52380015",
+      "name": "Apa"
+    },
+    {
+      "id": "Q19818170",
+      "name": "ARA Piedra Buena"
+    },
+    {
+      "id": "Q126951194",
+      "name": "Astrakhan"
+    },
+    {
+      "id": "Q21036291",
+      "name": "Baden-Württemberg"
+    },
+    {
+      "id": "Q850157",
+      "name": "Bathyscaphe Trieste"
+    },
+    {
+      "id": "Q18736952",
+      "name": "BNS Ali Haider"
+    },
+    {
+      "id": "Q461375",
+      "name": "Charles de Gaulle"
+    },
+    {
+      "id": "Q4350520",
+      "name": "Chilean frigate Almirante Cochrane"
+    },
+    {
+      "id": "Q4346690",
+      "name": "Chilean frigate Almirante Lynch"
+    },
+    {
+      "id": "Q18651425",
+      "name": "Chinese frigate Linyi (547)"
+    },
+    {
+      "id": "Q2420581",
+      "name": "Egyptian frigate Tahya Misr"
+    },
+    {
+      "id": "Q111844445",
+      "name": "ENS Al-Aziz"
+    },
+    {
+      "id": "Q1301441",
+      "name": "Erfurt"
+    },
+    {
+      "id": "Q3007615",
+      "name": "French frigate Prairial"
+    },
+    {
+      "id": "Q872070",
+      "name": "German frigate Lübeck"
+    },
+    {
+      "id": "Q111019538",
+      "name": "Golden Salmon"
+    },
+    {
+      "id": "Q1572860",
+      "name": "Hamburg"
+    },
+    {
+      "id": "Q3378551",
+      "name": "HDMS Peder Skram"
+    },
+    {
+      "id": "Q5630241",
+      "name": "HMAS Anzac"
+    },
+    {
+      "id": "Q3334280",
+      "name": "HMCS Algonquin"
+    },
+    {
+      "id": "Q5630698",
+      "name": "HMCS Annapolis"
+    },
+    {
+      "id": "Q5630710",
+      "name": "HMCS Assiniboine"
+    },
+    {
+      "id": "Q3334283",
+      "name": "HMCS Athabaskan"
+    },
+    {
+      "id": "Q516401",
+      "name": "HMCS Bonaventure"
+    },
+    {
+      "id": "Q5630798",
+      "name": "HMCS Fraser"
+    },
+    {
+      "id": "Q5630807",
+      "name": "HMCS Gatineau"
+    },
+    {
+      "id": "Q3334295",
+      "name": "HMCS Huron"
+    },
+    {
+      "id": "Q3334296",
+      "name": "HMCS Iroquois"
+    },
+    {
+      "id": "Q5630845",
+      "name": "HMCS Margaree"
+    },
+    {
+      "id": "Q16466328",
+      "name": "HMCS Outremont"
+    },
+    {
+      "id": "Q5630891",
+      "name": "HMCS Qu'Appelle"
+    },
+    {
+      "id": "Q5630900",
+      "name": "HMCS Restigouche"
+    },
+    {
+      "id": "Q5631149",
+      "name": "HMNZS Wellington"
+    },
+    {
+      "id": "Q4353101",
+      "name": "HMS Achilles"
+    },
+    {
+      "id": "Q4352612",
+      "name": "HMS Active"
+    },
+    {
+      "id": "Q1564265",
+      "name": "HMS Ajax"
+    },
+    {
+      "id": "Q4352844",
+      "name": "HMS Amazon"
+    },
+    {
+      "id": "Q4352875",
+      "name": "HMS Ambuscade"
+    },
+    {
+      "id": "Q5631339",
+      "name": "HMS Andromeda"
+    },
+    {
+      "id": "Q441144",
+      "name": "HMS Antelope"
+    },
+    {
+      "id": "Q5631372",
+      "name": "HMS Apollo"
+    },
+    {
+      "id": "Q464078",
+      "name": "HMS Ardent"
+    },
+    {
+      "id": "Q1564327",
+      "name": "HMS Argonaut"
+    },
+    {
+      "id": "Q5631404",
+      "name": "HMS Argyll"
+    },
+    {
+      "id": "Q5631407",
+      "name": "HMS Ariadne"
+    },
+    {
+      "id": "Q210680",
+      "name": "HMS Ark Royal"
+    },
+    {
+      "id": "Q4352867",
+      "name": "HMS Arrow"
+    },
+    {
+      "id": "Q5631427",
+      "name": "HMS Ashanti"
+    },
+    {
+      "id": "Q5631465",
+      "name": "HMS Aurora"
+    },
+    {
+      "id": "Q2273238",
+      "name": "HMS Avenger"
+    },
+    {
+      "id": "Q5631481",
+      "name": "HMS Bacchante"
+    },
+    {
+      "id": "Q2357197",
+      "name": "HMS Battleaxe"
+    },
+    {
+      "id": "Q5631524",
+      "name": "HMS Beaver"
+    },
+    {
+      "id": "Q5631571",
+      "name": "HMS Bigbury Bay"
+    },
+    {
+      "id": "Q5631587",
+      "name": "HMS Blackpool"
+    },
+    {
+      "id": "Q5631590",
+      "name": "HMS Blackwood"
+    },
+    {
+      "id": "Q4353304",
+      "name": "HMS Boxer"
+    },
+    {
+      "id": "Q2355388",
+      "name": "HMS Brazen"
+    },
+    {
+      "id": "Q5631674",
+      "name": "HMS Brighton"
+    },
+    {
+      "id": "Q1564440",
+      "name": "HMS Brilliant"
+    },
+    {
+      "id": "Q666380",
+      "name": "HMS Broadsword"
+    },
+    {
+      "id": "Q5631714",
+      "name": "HMS Burghead Bay"
+    },
+    {
+      "id": "Q2887653",
+      "name": "HMS Campbeltown"
+    },
+    {
+      "id": "Q5631850",
+      "name": "HMS Charybdis"
+    },
+    {
+      "id": "Q4352491",
+      "name": "HMS Chatham"
+    },
+    {
+      "id": "Q5631871",
+      "name": "HMS Chichester"
+    },
+    {
+      "id": "Q5631901",
+      "name": "HMS Cleopatra"
+    },
+    {
+      "id": "Q656920",
+      "name": "HMS Cornwall"
+    },
+    {
+      "id": "Q1558665",
+      "name": "HMS Cumberland"
+    },
+    {
+      "id": "Q5632064",
+      "name": "HMS Dainty"
+    },
+    {
+      "id": "Q5632061",
+      "name": "HMS Dalrymple"
+    },
+    {
+      "id": "Q5632070",
+      "name": "HMS Danae"
+    },
+    {
+      "id": "Q5632074",
+      "name": "HMS Daring"
+    },
+    {
+      "id": "Q5402442",
+      "name": "HMS Defender"
+    },
+    {
+      "id": "Q5632133",
+      "name": "HMS Diamond"
+    },
+    {
+      "id": "Q5632138",
+      "name": "HMS Diana"
+    },
+    {
+      "id": "Q5632149",
+      "name": "HMS Dido"
+    },
+    {
+      "id": "Q5632153",
+      "name": "HMS Diomede"
+    },
+    {
+      "id": "Q5632226",
+      "name": "HMS Duncan"
+    },
+    {
+      "id": "Q5632228",
+      "name": "HMS Dundas"
+    },
+    {
+      "id": "Q210651",
+      "name": "HMS Eagle"
+    },
+    {
+      "id": "Q5632249",
+      "name": "HMS Eastbourne"
+    },
+    {
+      "id": "Q5632320",
+      "name": "HMS Eskimo"
+    },
+    {
+      "id": "Q5632347",
+      "name": "HMS Euryalus"
+    },
+    {
+      "id": "Q5632355",
+      "name": "HMS Exmouth"
+    },
+    {
+      "id": "Q5632386",
+      "name": "HMS Falmouth"
+    },
+    {
+      "id": "Q5632541",
+      "name": "HMS Galatea"
+    },
+    {
+      "id": "Q5632605",
+      "name": "HMS Grafton"
+    },
+    {
+      "id": "Q5632656",
+      "name": "HMS Gurkha"
+    },
+    {
+      "id": "Q5632694",
+      "name": "HMS Hardy"
+    },
+    {
+      "id": "Q5632763",
+      "name": "HMS Hermione"
+    },
+    {
+      "id": "Q1029315",
+      "name": "HMS Hero"
+    },
+    {
+      "id": "Q5632895",
+      "name": "HMS Iron Duke"
+    },
+    {
+      "id": "Q5632915",
+      "name": "HMS Jaguar"
+    },
+    {
+      "id": "Q5632947",
+      "name": "HMS Jupiter"
+    },
+    {
+      "id": "Q5632986",
+      "name": "HMS Kent"
+    },
+    {
+      "id": "Q5632984",
+      "name": "HMS Keppel"
+    },
+    {
+      "id": "Q4040141",
+      "name": "HMS Lancaster"
+    },
+    {
+      "id": "Q5633086",
+      "name": "HMS Leander"
+    },
+    {
+      "id": "Q5633135",
+      "name": "HMS Lincoln"
+    },
+    {
+      "id": "Q1637905",
+      "name": "HMS London"
+    },
+    {
+      "id": "Q5633199",
+      "name": "HMS Lowestoft"
+    },
+    {
+      "id": "Q5633272",
+      "name": "HMS Malcolm"
+    },
+    {
+      "id": "Q4350507",
+      "name": "HMS Marlborough"
+    },
+    {
+      "id": "Q5633425",
+      "name": "HMS Monmouth"
+    },
+    {
+      "id": "Q5633432",
+      "name": "HMS Montrose"
+    },
+    {
+      "id": "Q5633437",
+      "name": "HMS Morecambe Bay"
+    },
+    {
+      "id": "Q5633448",
+      "name": "HMS Mounts Bay"
+    },
+    {
+      "id": "Q5633453",
+      "name": "HMS Murray"
+    },
+    {
+      "id": "Q5633474",
+      "name": "HMS Naiad"
+    },
+    {
+      "id": "Q5633541",
+      "name": "HMS Northumberland"
+    },
+    {
+      "id": "Q5633675",
+      "name": "HMS Palliser"
+    },
+    {
+      "id": "Q5633718",
+      "name": "HMS Pellew"
+    },
+    {
+      "id": "Q1565178",
+      "name": "HMS Penelope"
+    },
+    {
+      "id": "Q5633770",
+      "name": "HMS Phoebe"
+    },
+    {
+      "id": "Q1129811",
+      "name": "HMS Plymouth"
+    },
+    {
+      "id": "Q5633846",
+      "name": "HMS Portland"
+    },
+    {
+      "id": "Q1565207",
+      "name": "HMS Prince of Wales"
+    },
+    {
+      "id": "Q5633918",
+      "name": "HMS Puma"
+    },
+    {
+      "id": "Q1444474",
+      "name": "HMS Queen Elizabeth"
+    },
+    {
+      "id": "Q5634047",
+      "name": "HMS Rhyl"
+    },
+    {
+      "id": "Q5634063",
+      "name": "HMS Richmond"
+    },
+    {
+      "id": "Q5634107",
+      "name": "HMS Rothesay"
+    },
+    {
+      "id": "Q5634152",
+      "name": "HMS Russell"
+    },
+    {
+      "id": "Q5634235",
+      "name": "HMS Scarborough"
+    },
+    {
+      "id": "Q5634261",
+      "name": "HMS Scylla"
+    },
+    {
+      "id": "Q4352656",
+      "name": "HMS Sheffield"
+    },
+    {
+      "id": "Q5394427",
+      "name": "HMS Sirius"
+    },
+    {
+      "id": "Q5634380",
+      "name": "HMS Somerset"
+    },
+    {
+      "id": "Q5634430",
+      "name": "HMS St Albans"
+    },
+    {
+      "id": "Q5634528",
+      "name": "HMS Sutherland"
+    },
+    {
+      "id": "Q5634574",
+      "name": "HMS Tartar"
+    },
+    {
+      "id": "Q5634591",
+      "name": "HMS Tenby"
+    },
+    {
+      "id": "Q5634661",
+      "name": "HMS Torquay"
+    },
+    {
+      "id": "Q5634934",
+      "name": "HMS Westminster"
+    },
+    {
+      "id": "Q967251",
+      "name": "HMS Yarmouth"
+    },
+    {
+      "id": "Q5635049",
+      "name": "HMS Zulu"
+    },
+    {
+      "id": "Q46152",
+      "name": "HNLMS Abraham Crijnssen"
+    },
+    {
+      "id": "Q32856",
+      "name": "HNLMS De Ruyter"
+    },
+    {
+      "id": "Q46266",
+      "name": "HNLMS De Zeven Provinciën"
+    },
+    {
+      "id": "Q2786670",
+      "name": "HNLMS Evertsen"
+    },
+    {
+      "id": "Q4350334",
+      "name": "HNLMS Friesland"
+    },
+    {
+      "id": "Q46155",
+      "name": "HNLMS Van Galen"
+    },
+    {
+      "id": "Q2661233",
+      "name": "HNLMS Willem van der Zaan"
+    },
+    {
+      "id": "Q1548098",
+      "name": "HNoMS Fridtjof Nansen"
+    },
+    {
+      "id": "Q3439986",
+      "name": "HNoMS Helge Ingstad"
+    },
+    {
+      "id": "Q10861551",
+      "name": "HNoMS Narvik"
+    },
+    {
+      "id": "Q11979809",
+      "name": "HNoMS Oslo"
+    },
+    {
+      "id": "Q4353074",
+      "name": "HNoMS Otto Sverdrup"
+    },
+    {
+      "id": "Q1788129",
+      "name": "HNoMS Roald Amundsen"
+    },
+    {
+      "id": "Q12716236",
+      "name": "HNoMS Sleipner"
+    },
+    {
+      "id": "Q11868635",
+      "name": "HNoMS Stavanger"
+    },
+    {
+      "id": "Q3436458",
+      "name": "HNoMS Thor Heyerdahl"
+    },
+    {
+      "id": "Q5401252",
+      "name": "HNoMS Trondheim"
+    },
+    {
+      "id": "Q10513217",
+      "name": "HSwMS Gästrikland"
+    },
+    {
+      "id": "Q10513230",
+      "name": "HSwMS Halland"
+    },
+    {
+      "id": "Q10513253",
+      "name": "HSwMS Hälsingland"
+    },
+    {
+      "id": "Q4352643",
+      "name": "HSwMS Helsingborg"
+    },
+    {
+      "id": "Q10513258",
+      "name": "HSwMS Illern"
+    },
+    {
+      "id": "Q10515018",
+      "name": "HSwMS Malmö"
+    },
+    {
+      "id": "Q10515037",
+      "name": "HSwMS Najad"
+    },
+    {
+      "id": "Q16253223",
+      "name": "HSwMS Neptun"
+    },
+    {
+      "id": "Q10515285",
+      "name": "HSwMS Östergötland"
+    },
+    {
+      "id": "Q10515103",
+      "name": "HSwMS Sjöbjörnen"
+    },
+    {
+      "id": "Q13360784",
+      "name": "HSwMS Sjöhästen"
+    },
+    {
+      "id": "Q10515107",
+      "name": "HSwMS Sjöhunden"
+    },
+    {
+      "id": "Q7414267",
+      "name": "HSwMS Sjölejonet"
+    },
+    {
+      "id": "Q10515186",
+      "name": "HSwMS Södermanland"
+    },
+    {
+      "id": "Q10515155",
+      "name": "HSwMS Stockholm"
+    },
+    {
+      "id": "Q4352699",
+      "name": "HSwMS Visby"
+    },
+    {
+      "id": "Q11713643",
+      "name": "HTMS Sukhothai"
+    },
+    {
+      "id": "Q5972525",
+      "name": "INS Hosdurg"
+    },
+    {
+      "id": "Q3284481",
+      "name": "INS Vikramaditya"
+    },
+    {
+      "id": "Q1058351",
+      "name": "INS Viraat"
+    },
+    {
+      "id": "Q3492549",
+      "name": "Iranian frigate Jamaran"
+    },
+    {
+      "id": "Q99216563",
+      "name": "IRIS Bayandor"
+    },
+    {
+      "id": "Q6067406",
+      "name": "IRIS Damavand"
+    },
+    {
+      "id": "Q115673960",
+      "name": "IRIS Dena"
+    },
+    {
+      "id": "Q123592359",
+      "name": "IRIS Deylaman"
+    },
+    {
+      "id": "Q5927986",
+      "name": "IRIS Sahand"
+    },
+    {
+      "id": "Q5245062",
+      "name": "Italian destroyer Caio Duilio"
+    },
+    {
+      "id": "Q11256952",
+      "name": "JDS Akishio"
+    },
+    {
+      "id": "Q104791235",
+      "name": "Köln"
+    },
+    {
+      "id": "Q7676893",
+      "name": "KRI Cakra"
+    },
+    {
+      "id": "Q3018097",
+      "name": "Latouche-Tréville"
+    },
+    {
+      "id": "Q4043303",
+      "name": "LÉ Ciara"
+    },
+    {
+      "id": "Q2091364",
+      "name": "LÉ Orla"
+    },
+    {
+      "id": "Q99198666",
+      "name": "Liven"
+    },
+    {
+      "id": "Q2103611",
+      "name": "Maillé-Brézé"
+    },
+    {
+      "id": "Q126980689",
+      "name": "Majachkalá"
+    },
+    {
+      "id": "Q20056928",
+      "name": "Moroccan frigate Allal Ben Abdellah"
+    },
+    {
+      "id": "Q20058178",
+      "name": "Moroccan frigate Sultan Moulay Ismail"
+    },
+    {
+      "id": "Q904556",
+      "name": "NAe São Paulo"
+    },
+    {
+      "id": "Q474975",
+      "name": "Navarra"
+    },
+    {
+      "id": "Q19965645",
+      "name": "Nordrhein-Westfalen"
+    },
+    {
+      "id": "Q10335133",
+      "name": "NRP Afonso Cerqueira"
+    },
+    {
+      "id": "Q18477166",
+      "name": "NRP Almirante Gago Coutinho"
+    },
+    {
+      "id": "Q56403624",
+      "name": "NRP Almirante Magalhães Correia"
+    },
+    {
+      "id": "Q56403593",
+      "name": "NRP Almirante Pereira da Silva"
+    },
+    {
+      "id": "Q16489273",
+      "name": "NRP Alvares Cabral"
+    },
+    {
+      "id": "Q10335138",
+      "name": "NRP António Enes"
+    },
+    {
+      "id": "Q1945530",
+      "name": "NRP Bartolomeu Dias"
+    },
+    {
+      "id": "Q56403111",
+      "name": "NRP Comandante Roberto Ivens"
+    },
+    {
+      "id": "Q6955188",
+      "name": "NRP Corte Real"
+    },
+    {
+      "id": "Q25421426",
+      "name": "NRP Jacinto Cândido"
+    },
+    {
+      "id": "Q18477170",
+      "name": "NRP João Coutinho"
+    },
+    {
+      "id": "Q10335150",
+      "name": "NRP João Roby"
+    },
+    {
+      "id": "Q3286518",
+      "name": "NRP Vasco da Gama"
+    },
+    {
+      "id": "Q20034836",
+      "name": "ORP Bielik"
+    },
+    {
+      "id": "Q7072936",
+      "name": "ORP Generał Kazimierz Pułaski"
+    },
+    {
+      "id": "Q4132290",
+      "name": "ORP Generał Tadeusz Kościuszko"
+    },
+    {
+      "id": "Q7119870",
+      "name": "PNS Hangor"
+    },
+    {
+      "id": "Q19840577",
+      "name": "PNS Zulfiquar"
+    },
+    {
+      "id": "Q3408270",
+      "name": "Provence"
+    },
+    {
+      "id": "Q1746021",
+      "name": "Rheinland-Pfalz"
+    },
+    {
+      "id": "Q7388796",
+      "name": "SAS Amatola"
+    },
+    {
+      "id": "Q16829278",
+      "name": "SAS Charlotte Maxeke"
+    },
+    {
+      "id": "Q11664660",
+      "name": "SAS Isandlwana"
+    },
+    {
+      "id": "Q7388807",
+      "name": "SAS Mendi"
+    },
+    {
+      "id": "Q7388812",
+      "name": "SAS President Kruger"
+    },
+    {
+      "id": "Q16961301",
+      "name": "SAS Queen Modjadji"
+    },
+    {
+      "id": "Q7388818",
+      "name": "SAS Spioenkop"
+    },
+    {
+      "id": "Q16720971",
+      "name": "Shtandart"
+    },
+    {
+      "id": "Q60775815",
+      "name": "TCG Burgazada"
+    },
+    {
+      "id": "Q6074221",
+      "name": "TCG Kemalreis"
+    },
+    {
+      "id": "Q1566337",
+      "name": "U-11"
+    },
+    {
+      "id": "Q3428537",
+      "name": "USS Arthur W. Radford"
+    },
+    {
+      "id": "Q3258981",
+      "name": "USS Clark"
+    },
+    {
+      "id": "Q1565177",
+      "name": "USS Edson"
+    },
+    {
+      "id": "Q204342",
+      "name": "USS Enterprise"
+    },
+    {
+      "id": "Q5225446",
+      "name": "USS Mackerel"
+    },
+    {
+      "id": "Q5230841",
+      "name": "USS Marlin"
+    },
+    {
+      "id": "Q7871959",
+      "name": "USS Moosbrugger"
+    },
+    {
+      "id": "Q2507073",
+      "name": "USS Norfolk"
+    },
+    {
+      "id": "Q2470667",
+      "name": "USS Peterson"
+    },
+    {
+      "id": "Q2471222",
+      "name": "USS Spruance"
+    },
+    {
+      "id": "Q4112585",
+      "name": "Vice-Admiral Kulakov"
+    },
+    {
+      "id": "Q4112583",
+      "name": "Vitse-Admiral Drozd"
+    },
+    {
+      "id": "Q4112951",
+      "name": "Vladivostok"
+    },
+    {
+      "id": "Q126979976",
+      "name": "Volgodonsk"
+    },
+    {
+      "id": "Q4538778",
+      "name": "Yaroslav Mudry"
+    }
+  ]
+}
