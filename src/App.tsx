@@ -14,6 +14,7 @@ import { ShipSearch } from './components/ShipSearch/ShipSearch';
 import { GuessHistory, type GuessEntry } from './components/GuessHistory/GuessHistory';
 import { WinModal } from './components/WinModal/WinModal';
 import { HelpModal } from './components/HelpModal/HelpModal';
+import { ModeMenu } from './components/ModeMenu/ModeMenu';
 import type { ShipListEntry } from './hooks/useShipSearch';
 import './styles/animations.css';
 import './App.css';
@@ -24,7 +25,7 @@ function App() {
   const modeConfig = GAME_MODES[currentMode];
 
   // Mode completion tracking
-  const { isComplete: isModeComplete, markComplete } = useModeCompletion(currentMode);
+  const { isComplete: isModeComplete, markComplete, allCompletions, isUnlocked } = useModeCompletion(currentMode);
 
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -226,9 +227,15 @@ function App() {
     return currentTurn >= clueIndex + 1;
   };
 
-  // Expose setCurrentMode for future mode selector component
-  // For now, mode is always 'main' but this enables future UI
-  void setCurrentMode; // Silence unused variable warning
+  // Handle mode selection from menu
+  const handleModeSelect = useCallback(
+    (mode: GameModeId) => {
+      if (isUnlocked(mode)) {
+        setCurrentMode(mode);
+      }
+    },
+    [isUnlocked]
+  );
 
   if (loading) {
     return (
@@ -276,9 +283,16 @@ function App() {
       <GameLayout
         header={
           <div className="app-header">
+            <div className="app-header__left">
+              <ModeMenu
+                currentMode={currentMode}
+                completions={allCompletions}
+                onSelectMode={handleModeSelect}
+              />
+            </div>
             <div className="app-header__center">
               <h1 className="app-title">Keel</h1>
-              <p className="app-tagline">Daily warship guessing game</p>
+              <p className="app-tagline">{modeConfig.name}</p>
             </div>
             <button
               className="app-header__help-button"
