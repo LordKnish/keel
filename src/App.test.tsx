@@ -2,14 +2,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import App from './App';
 
-// Mock ship list data for tests
-const mockShipList = {
+// Mock class list data for tests (ship-list.json now contains classes)
+const mockClassList = {
   generatedAt: '2026-01-18T00:00:00Z',
   count: 3,
-  ships: [
-    { id: 'Q123', name: 'HMS Test Ship' },
-    { id: 'Q456', name: 'USS Enterprise' },
-    { id: 'Q789', name: 'Bismarck' },
+  classes: [
+    { id: 'class:test-class', name: 'Test-class frigate' },
+    { id: 'class:nimitz-class', name: 'Nimitz-class aircraft carrier' },
+    { id: 'class:bismarck-class', name: 'Bismarck-class battleship' },
   ],
 };
 
@@ -46,7 +46,7 @@ describe('App', () => {
       if (String(url).includes('ship-list.json')) {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve(mockShipList),
+          json: () => Promise.resolve(mockClassList),
         } as Response);
       }
       return Promise.resolve({
@@ -93,10 +93,10 @@ describe('App', () => {
     });
   });
 
-  it('renders the ship search input', async () => {
+  it('renders the class search input', async () => {
     render(<App />);
     await waitFor(() => {
-      expect(screen.getByLabelText('Search for a ship')).toBeInTheDocument();
+      expect(screen.getByLabelText('Search for a ship class')).toBeInTheDocument();
     });
   });
 
