@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Confetti from 'react-confetti';
 import type { GameData, GuessResult } from './types/game';
+import { GAME_MODES, type GameModeId } from './types/modes';
+import { useModeCompletion } from './hooks/useModeCompletion';
 import { GameLayout } from './components/Game/GameLayout';
 import { Silhouette } from './components/Silhouette/Silhouette';
 import { TurnIndicator } from './components/TurnIndicator/TurnIndicator';
@@ -17,6 +19,13 @@ import './styles/animations.css';
 import './App.css';
 
 function App() {
+  // Current game mode
+  const [currentMode, setCurrentMode] = useState<GameModeId>('main');
+  const modeConfig = GAME_MODES[currentMode];
+
+  // Mode completion tracking
+  const { isComplete: isModeComplete, markComplete } = useModeCompletion(currentMode);
+
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +39,7 @@ function App() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showWinModal, setShowWinModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
-  
+
   // Win reveal state - reveals clues sequentially on win
   const [winRevealStep, setWinRevealStep] = useState(0);
   const [isRevealing, setIsRevealing] = useState(false);
@@ -38,6 +47,9 @@ function App() {
   // Timer state
   const startTimeRef = useRef<number | null>(null);
   const [timeTaken, setTimeTaken] = useState(0);
+
+  // Track if we've saved completion for this game session
+  const completionSavedRef = useRef(false);
 
   // Window dimensions for confetti
   const [windowSize, setWindowSize] = useState({
@@ -48,6 +60,25 @@ function App() {
   // Current turn is 1 + number of guesses made
   const currentTurn = guessResults.length + 1;
   const totalTurns = 5;
+
+  // Reset game state when mode changes
+  useEffect(() => {
+    setGameData(null);
+    setLoading(true);
+    setError(null);
+    setGuesses([]);
+    setGuessedIds([]);
+    setGuessResults([]);
+    setIsGameComplete(false);
+    setIsWin(false);
+    setShowConfetti(false);
+    setShowWinModal(false);
+    setWinRevealStep(0);
+    setIsRevealing(false);
+    startTimeRef.current = null;
+    setTimeTaken(0);
+    completionSavedRef.current = false;
+  }, [currentMode]);
 
   // Start timer when game data loads
   useEffect(() => {
@@ -68,10 +99,18 @@ function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Load game data for current mode
   useEffect(() => {
     async function loadGameData() {
       try {
-        const response = await fetch('/api/game/today');
+        // Try API first, fallback to static file
+        let response = await fetch(`/api/game/today?mode=${currentMode}`);
+
+        // If API fails, try static file
+        if (!response.ok) {
+          response = await fetch(modeConfig.dataFile);
+        }
+
         if (!response.ok) {
           throw new Error(`Failed to load game data: ${response.status}`);
         }
@@ -85,7 +124,20 @@ function App() {
     }
 
     loadGameData();
-  }, []);
+  }, [currentMode, modeConfig.dataFile]);
+
+  // Save completion to localStorage when game ends
+  useEffect(() => {
+    if (isGameComplete && !completionSavedRef.current && !isModeComplete) {
+      completionSavedRef.current = true;
+      markComplete({
+        isWin,
+        guessCount: guessResults.length,
+        timeTaken,
+        guessResults,
+      });
+    }
+  }, [isGameComplete, isWin, guessResults, timeTaken, markComplete, isModeComplete]);
 
   // Sequential reveal effect on win
   useEffect(() => {
@@ -143,7 +195,7 @@ function App() {
           const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
           setTimeTaken(elapsed);
         }
-        
+
         setIsWin(true);
         setIsGameComplete(true);
         setShowConfetti(true);
@@ -173,6 +225,10 @@ function App() {
     // Normal gameplay - reveal based on current turn
     return currentTurn >= clueIndex + 1;
   };
+
+  // Expose setCurrentMode for future mode selector component
+  // For now, mode is always 'main' but this enables future UI
+  void setCurrentMode; // Silence unused variable warning
 
   if (loading) {
     return (
