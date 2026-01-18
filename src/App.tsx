@@ -11,6 +11,7 @@ import { PhotoReveal } from './components/Clues/PhotoReveal';
 import { ShipSearch } from './components/ShipSearch/ShipSearch';
 import { GuessHistory, type GuessEntry } from './components/GuessHistory/GuessHistory';
 import { WinModal } from './components/WinModal/WinModal';
+import { HelpModal } from './components/HelpModal/HelpModal';
 import type { ShipListEntry } from './hooks/useShipSearch';
 import './styles/animations.css';
 import './App.css';
@@ -28,6 +29,7 @@ function App() {
   const [isWin, setIsWin] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showWinModal, setShowWinModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
   
   // Win reveal state - reveals clues sequentially on win
   const [winRevealStep, setWinRevealStep] = useState(0);
@@ -206,12 +208,26 @@ function App() {
         timeTaken={timeTaken}
         onClose={() => setShowWinModal(false)}
       />
+      <HelpModal
+        isOpen={showHelpModal}
+        onClose={() => setShowHelpModal(false)}
+      />
       <GameLayout
         header={
-          <>
-            <h1 className="app-title">Keel</h1>
-            <p className="app-tagline">Daily warship guessing game</p>
-          </>
+          <div className="app-header">
+            <div className="app-header__center">
+              <h1 className="app-title">Keel</h1>
+              <p className="app-tagline">Daily warship guessing game</p>
+            </div>
+            <button
+              className="app-header__help-button"
+              onClick={() => setShowHelpModal(true)}
+              type="button"
+              aria-label="How to play"
+            >
+              ?
+            </button>
+          </div>
         }
         silhouette={
           <Silhouette
