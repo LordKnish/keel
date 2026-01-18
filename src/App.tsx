@@ -69,7 +69,7 @@ function App() {
   useEffect(() => {
     async function loadGameData() {
       try {
-        const response = await fetch('/game-data.json');
+        const response = await fetch('/api/game/today');
         if (!response.ok) {
           throw new Error(`Failed to load game data: ${response.status}`);
         }
