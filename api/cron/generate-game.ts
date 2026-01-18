@@ -646,17 +646,51 @@ async function generateLineArtFromUrl(imageUrl: string): Promise<string> {
   // 3. Remove background (if API key available)
   const noBgBuffer = await removeBackgroundWithAPI(preprocessed);
 
-  // 4. Generate line art using Photon (laplace + invert)
-  console.log('  Generating line art with Photon (laplace + invert)...');
+  // 4. Generate pencil sketch effect
+  console.log('  Generating pencil sketch...');
 
-  const image = photon.PhotonImage.new_from_byteslice(new Uint8Array(noBgBuffer));
-  photon.laplace(image);
-  photon.invert(image);
+  // Step 1: Grayscale
+  const grayscale = await sharp(noBgBuffer)
+    .grayscale()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
 
-  const lineArtBytes = image.get_bytes();
+  const { data: grayData, info } = grayscale;
 
-  // 5. Output as PNG (keep clean lines)
-  const lineArt = await sharp(Buffer.from(lineArtBytes))
+  // Step 2: Invert the grayscale
+  const inverted = Buffer.alloc(grayData.length);
+  for (let i = 0; i < grayData.length; i++) {
+    inverted[i] = 255 - grayData[i]!;
+  }
+
+  // Step 3: Gaussian blur the inverted image
+  const blurred = await sharp(inverted, {
+    raw: { width: info.width, height: info.height, channels: 1 },
+  })
+    .blur(21) // Larger blur = softer sketch
+    .raw()
+    .toBuffer();
+
+  // Step 4: Color dodge blend: result = base / (1 - blend/255) clamped to 255
+  const sketch = Buffer.alloc(grayData.length);
+  for (let i = 0; i < grayData.length; i++) {
+    const base = grayData[i]!;
+    const blend = blurred[i]!;
+
+    if (blend === 255) {
+      sketch[i] = 255;
+    } else {
+      // Color dodge formula
+      const result = Math.min(255, Math.floor((base * 256) / (256 - blend)));
+      sketch[i] = result;
+    }
+  }
+
+  // Step 5: Increase contrast for bolder lines
+  const lineArt = await sharp(sketch, {
+    raw: { width: info.width, height: info.height, channels: 1 },
+  })
+    .linear(1.5, -50) // Boost contrast
     .png()
     .toBuffer();
 

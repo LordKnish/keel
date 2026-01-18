@@ -18,7 +18,7 @@
   --color-border: #d3d6da;
 
   /* Silhouette */
-  --color-silhouette-bg: #1a1a1b;
+  --color-silhouette-bg: #fafafa; /* Light background for pencil sketch */
 
   /* Clue Card Backgrounds */
   --color-card-specs: #e8eef4;
