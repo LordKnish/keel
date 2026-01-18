@@ -2,13 +2,24 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import App from './App';
 
+// Mock ship list data for tests
+const mockShipList = {
+  generatedAt: '2026-01-18T00:00:00Z',
+  count: 3,
+  ships: [
+    { id: 'Q123', name: 'HMS Test Ship' },
+    { id: 'Q456', name: 'USS Enterprise' },
+    { id: 'Q789', name: 'Bismarck' },
+  ],
+};
+
 // Mock game data for tests
 const mockGameData = {
   date: '2026-01-18',
   ship: {
     id: 'Q123',
     name: 'HMS Test Ship',
-    aliases: [],
+    aliases: ['Test Ship', 'TS'],
   },
   silhouette: 'data:image/png;base64,test',
   clues: {
@@ -30,11 +41,19 @@ const mockGameData = {
 
 describe('App', () => {
   beforeEach(() => {
-    // Mock fetch
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockGameData),
-    } as Response);
+    // Mock fetch to return different data based on URL
+    vi.spyOn(globalThis, 'fetch').mockImplementation((url) => {
+      if (String(url).includes('ship-list.json')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockShipList),
+        } as Response);
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(mockGameData),
+      } as Response);
+    });
   });
 
   afterEach(() => {
@@ -71,6 +90,13 @@ describe('App', () => {
     render(<App />);
     await waitFor(() => {
       expect(screen.getByRole('group', { name: /Turn/ })).toBeInTheDocument();
+    });
+  });
+
+  it('renders the ship search input', async () => {
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByLabelText('Search for a ship')).toBeInTheDocument();
     });
   });
 
