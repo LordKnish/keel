@@ -1,0 +1,154 @@
+/* ==========================================================================
+   Ship Search - Autocomplete Component
+   ========================================================================== */
+
+.ship-search {
+  width: 100%;
+}
+
+.ship-search--error {
+  text-align: center;
+  padding: var(--space-4);
+}
+
+.ship-search__error-message {
+  color: #c53030;
+  font-size: var(--font-size-sm);
+}
+
+/* ==========================================================================
+   ComboBox Container
+   ========================================================================== */
+
+.ship-search__combobox {
+  width: 100%;
+  position: relative;
+}
+
+/* ==========================================================================
+   Input Wrapper & Input
+   ========================================================================== */
+
+.ship-search__input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.ship-search__input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+  background-color: white;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.ship-search__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.ship-search__input:hover:not(:disabled) {
+  border-color: var(--color-text-muted);
+}
+
+.ship-search__input:focus {
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.15);
+}
+
+.ship-search__input:disabled {
+  background-color: var(--color-background);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* ==========================================================================
+   Popover & ListBox
+   ========================================================================== */
+
+.ship-search__popover {
+  width: var(--trigger-width);
+  max-height: 320px;
+  overflow-y: auto;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+  margin-top: var(--space-1);
+}
+
+.ship-search__popover[data-entering] {
+  animation: popover-enter 150ms ease-out;
+}
+
+.ship-search__popover[data-exiting] {
+  animation: popover-exit 100ms ease-in;
+}
+
+@keyframes popover-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes popover-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.ship-search__listbox {
+  padding: var(--space-1);
+  outline: none;
+}
+
+.ship-search__listbox-item {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--transition-fast);
+}
+
+.ship-search__listbox-item[data-focused],
+.ship-search__listbox-item[data-hovered] {
+  background-color: var(--color-hover);
+}
+
+.ship-search__listbox-item[data-selected] {
+  background-color: var(--color-focus);
+  color: white;
+}
+
+.ship-search__listbox-item[data-focused][data-selected] {
+  background-color: var(--color-focus);
+}
+
+/* ==========================================================================
+   Empty State
+   ========================================================================== */
+
+.ship-search__listbox:empty::before {
+  content: 'No ships found';
+  display: block;
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
