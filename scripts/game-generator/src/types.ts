@@ -53,7 +53,7 @@ export interface ShipIdentity {
   /** Primary display name (e.g., "USS Enterprise") */
   name: string;
   /** Ship class name for matching (e.g., "Fletcher-class destroyer") */
-  className: string | null;
+  className: string;
   /** Alternative names/designations for fuzzy matching */
   aliases: string[];
 }

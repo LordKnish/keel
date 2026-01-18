@@ -43,13 +43,14 @@ WHERE {
   ?ship wdt:P31 ?type .                   # Instance of specific ship type
   ?ship wdt:P18 ?image .                  # Has image
   ?ship wdt:P729 ?commissioned .          # Has commissioned date
+  ?ship wdt:P289 ?class .                 # Has ship class (required)
 
   # Require at least length OR displacement
   OPTIONAL { ?ship wdt:P2043 ?length . }
   OPTIONAL { ?ship wdt:P2386 ?displacement . }
   FILTER(BOUND(?length) || BOUND(?displacement))
 
-  # Filter for ships commissioned after 1950
+  # Filter for ships commissioned after 1980
   FILTER(YEAR(?commissioned) > 1980)
 
   # Must have English label (not Q-number)
@@ -93,13 +94,14 @@ WHERE {
   ?ship wdt:P31 ?type .                   # Instance of specific ship type
   ?ship wdt:P18 ?image .                  # Has image
   ?ship wdt:P729 ?commissioned .          # Has commissioned date
+  ?ship wdt:P289 ?class .                 # Has ship class (required)
 
   # Require at least length OR displacement
   OPTIONAL { ?ship wdt:P2043 ?length . }
   OPTIONAL { ?ship wdt:P2386 ?displacement . }
   FILTER(BOUND(?length) || BOUND(?displacement))
 
-  # Filter for ships commissioned after 1950
+  # Filter for ships commissioned after 1980
   FILTER(YEAR(?commissioned) > 1980)
 
   # Must have English label
@@ -110,7 +112,6 @@ WHERE {
   ${excludeFilter}
 
   # Optional properties
-  OPTIONAL { ?ship wdt:P289 ?class . }
   OPTIONAL { ?ship wdt:P17 ?country . }
   OPTIONAL {
     ?ship wdt:P137 ?operator .
@@ -204,7 +205,7 @@ export interface SelectedShip {
   id: string;
   name: string;
   imageUrl: string;
-  className: string | null;
+  className: string;
   country: string | null;
   length: string | null;
   displacement: string | null;
@@ -326,7 +327,7 @@ function parseShipResult(results: WikidataShipResult[]): SelectedShip {
     imageUrl: first.image?.value
       ? commonsFileToUrl(first.image.value.split('/').pop() || '')
       : '',
-    className: first.classLabel?.value || null,
+    className: first.classLabel!.value,
     country,
     length: first.length?.value ? `${Math.round(parseFloat(first.length.value))}m` : null,
     displacement: first.displacement?.value

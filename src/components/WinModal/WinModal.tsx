@@ -6,7 +6,7 @@ export interface WinModalProps {
   /** Whether the modal is open */
   isOpen: boolean;
   /** Ship class name (e.g., "Fletcher-class destroyer") */
-  className: string | null;
+  className: string;
   /** Specific ship name (e.g., "USS Johnston") */
   shipName: string;
   /** Number of guesses it took */
@@ -76,10 +76,8 @@ export function WinModal({
 
   if (!isOpen) return null;
 
-  // Display class name as primary with ship name in parentheses (only if different)
-  const displayText = className
-    ? `${className} (${shipName})`
-    : shipName;
+  // Display class name as primary with ship name in parentheses
+  const displayText = `${className} (${shipName})`;
 
   return (
     <div className="win-modal-overlay" onClick={onClose}>

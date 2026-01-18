@@ -277,8 +277,8 @@ function App() {
             <div className="game-result">
               <p className="game-result__text">
                 {isWin
-                  ? `Congratulations! You identified ${gameData.ship.className ? `${gameData.ship.className} (${gameData.ship.name})` : gameData.ship.name}!`
-                  : `Game over! It was ${gameData.ship.className ? `${gameData.ship.className} (${gameData.ship.name})` : gameData.ship.name}.`}
+                  ? `Congratulations! You identified ${gameData.ship.className} (${gameData.ship.name})!`
+                  : `Game over! It was ${gameData.ship.className} (${gameData.ship.name}).`}
               </p>
               {isWin && !showWinModal && (
                 <button
