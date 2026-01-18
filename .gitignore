@@ -58,3 +58,5 @@ scripts/game-generator/data/*.json
 scripts/silhouette-poc/data/
 scripts/silhouette-poc/output/
 scripts/silhouette-poc/images/
+.vercel
+.env*.local
