@@ -1,0 +1,44 @@
+/* ==========================================================================
+   Silhouette Component
+   ========================================================================== */
+
+.silhouette {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--space-4);
+  background-color: var(--color-silhouette-bg);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.silhouette__image {
+  display: block;
+  max-width: 100%;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  /* Ensure white lines are visible on dark background */
+  filter: brightness(1);
+  user-select: none;
+}
+
+/* Tablet and up */
+@media (min-width: 640px) {
+  .silhouette {
+    padding: var(--space-6);
+  }
+
+  .silhouette__image {
+    max-height: 350px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .silhouette__image {
+    max-height: 400px;
+  }
+}
