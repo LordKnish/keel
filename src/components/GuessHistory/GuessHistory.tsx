@@ -4,7 +4,7 @@ import './GuessHistory.css';
  * Single guess entry in the history
  */
 export interface GuessEntry {
-  /** Name of the guessed ship */
+  /** Name of the guessed class (e.g., "Fletcher-class destroyer") */
   shipName: string;
   /** Whether the guess was correct */
   correct: boolean;
@@ -17,7 +17,7 @@ export interface GuessHistoryProps {
 
 /**
  * Displays the history of previous guesses.
- * Shows ship names with green/gray styling for correct/wrong.
+ * Shows class names with green/gray styling for correct/wrong.
  * New entries animate in with cardReveal animation.
  */
 export function GuessHistory({ guesses }: GuessHistoryProps) {
