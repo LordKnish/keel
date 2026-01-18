@@ -12,7 +12,7 @@ const STORAGE_KEY = 'keel-daily-completion';
  * Get today's date in ISO format (YYYY-MM-DD).
  */
 function getToday(): string {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split('T')[0] as string;
 }
 
 /**
