@@ -1,14 +1,17 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
-  ComboBox,
-  Input,
-  Label,
-  ListBox,
-  ListBoxItem,
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandItem,
+} from '@/components/ui/command';
+import {
   Popover,
-} from 'react-aria-components';
+  PopoverContent,
+  PopoverAnchor,
+} from '@/components/ui/popover';
 import { useShipSearch, type ShipListEntry } from '../../hooks/useShipSearch';
-import { ShipOption } from './ShipOption';
 import './ShipSearch.css';
 
 export interface ShipSearchProps {
@@ -19,35 +22,51 @@ export interface ShipSearchProps {
 }
 
 /**
- * Ship search autocomplete component using React Aria ComboBox.
+ * Ship search autocomplete component using shadcn Command (cmdk).
  * Provides accessible fuzzy search for ship names.
  */
 export function ShipSearch({ onSelect, disabled = false }: ShipSearchProps) {
   const { search, isLoading, error } = useShipSearch();
+  const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [items, setItems] = useState<ShipListEntry[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleInputChange = useCallback(
-    (value: string) => {
-      setInputValue(value);
-      const results = search(value);
+  // Sync search results when input changes
+  useEffect(() => {
+    if (inputValue.length >= 2) {
+      const results = search(inputValue);
       setItems(results);
-    },
-    [search]
-  );
+      setOpen(results.length > 0);
+    } else {
+      setItems([]);
+      setOpen(false);
+    }
+  }, [inputValue, search]);
 
-  const handleSelectionChange = useCallback(
-    (key: React.Key | null) => {
-      if (key === null) return;
-      const selected = items.find((item) => item.id === key);
+  const handleInputChange = useCallback((value: string) => {
+    setInputValue(value);
+  }, []);
+
+  const handleSelect = useCallback(
+    (shipId: string) => {
+      const selected = items.find((item) => item.id === shipId);
       if (selected) {
         onSelect(selected);
         setInputValue('');
         setItems([]);
+        setOpen(false);
       }
     },
     [items, onSelect]
   );
+
+  // Close popover on escape
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setOpen(false);
+    }
+  }, []);
 
   if (error) {
     return (
@@ -60,40 +79,48 @@ export function ShipSearch({ onSelect, disabled = false }: ShipSearchProps) {
   }
 
   return (
-    <div className="ship-search">
-      <ComboBox
-        className="ship-search__combobox"
-        inputValue={inputValue}
-        items={items}
-        onInputChange={handleInputChange}
-        onSelectionChange={handleSelectionChange}
-        isDisabled={disabled || isLoading}
-        allowsCustomValue={false}
-        menuTrigger="focus"
-        aria-label="Search for a ship"
-      >
-        <Label className="ship-search__label sr-only">Search for a ship</Label>
-        <div className="ship-search__input-wrapper">
-          <Input
-            className="ship-search__input"
-            placeholder={isLoading ? 'Loading ships...' : 'Type a ship name...'}
-          />
-        </div>
-        <Popover className="ship-search__popover">
-          <ListBox className="ship-search__listbox">
-            {(item: ShipListEntry) => (
-              <ListBoxItem
-                key={item.id}
-                id={item.id}
-                textValue={item.name}
-                className="ship-search__listbox-item"
-              >
-                <ShipOption name={item.name} />
-              </ListBoxItem>
-            )}
-          </ListBox>
-        </Popover>
-      </ComboBox>
+    <div className="ship-search" onKeyDown={handleKeyDown}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverAnchor asChild>
+          <Command
+            className="ship-search__command"
+            shouldFilter={false}
+          >
+            <CommandInput
+              ref={inputRef}
+              className="ship-search__input"
+              placeholder={isLoading ? 'Loading ships...' : 'Type a ship name...'}
+              value={inputValue}
+              onValueChange={handleInputChange}
+              disabled={disabled || isLoading}
+              aria-label="Search for a ship"
+            />
+          </Command>
+        </PopoverAnchor>
+        <PopoverContent
+          className="ship-search__popover"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+          align="start"
+          sideOffset={4}
+        >
+          <Command shouldFilter={false}>
+            <CommandList className="ship-search__list">
+              <CommandEmpty>No ships found</CommandEmpty>
+              {items.map((item) => (
+                <CommandItem
+                  key={item.id}
+                  value={item.id}
+                  onSelect={handleSelect}
+                  className="ship-search__item"
+                >
+                  {item.name}
+                </CommandItem>
+              ))}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
