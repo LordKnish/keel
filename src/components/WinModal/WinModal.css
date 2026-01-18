@@ -67,8 +67,15 @@
   margin-bottom: var(--space-2);
 }
 
+.win-modal__class-name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: var(--space-1);
+}
+
 .win-modal__ship-name {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
   color: var(--color-text-muted);
   margin-bottom: var(--space-6);
 }

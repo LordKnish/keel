@@ -5,7 +5,9 @@ import './WinModal.css';
 export interface WinModalProps {
   /** Whether the modal is open */
   isOpen: boolean;
-  /** Ship name that was guessed */
+  /** Ship class name (e.g., "Fletcher-class destroyer") */
+  className: string | null;
+  /** Specific ship name (e.g., "USS Johnston") */
   shipName: string;
   /** Number of guesses it took */
   guessCount: number;
@@ -21,10 +23,11 @@ export interface WinModalProps {
 
 /**
  * WinModal displays the victory screen with share functionality.
- * Shows stats, time taken, and a Wordle-style share button.
+ * Shows class name prominently, ship name secondary, stats, and share button.
  */
 export function WinModal({
   isOpen,
+  className,
   shipName,
   guessCount,
   totalTurns,
@@ -73,6 +76,10 @@ export function WinModal({
 
   if (!isOpen) return null;
 
+  // Display class name as primary, ship name as secondary
+  const displayName = className || shipName;
+  const showShipName = className && className !== shipName;
+
   return (
     <div className="win-modal-overlay" onClick={onClose}>
       <div className="win-modal" onClick={(e) => e.stopPropagation()}>
@@ -87,7 +94,10 @@ export function WinModal({
 
         <div className="win-modal__content">
           <h2 className="win-modal__title">🎉 Congratulations!</h2>
-          <p className="win-modal__ship-name">You identified {shipName}</p>
+          <p className="win-modal__class-name">You identified {displayName}</p>
+          {showShipName && (
+            <p className="win-modal__ship-name">({shipName})</p>
+          )}
 
           <div className="win-modal__stats">
             <div className="win-modal__stat">
