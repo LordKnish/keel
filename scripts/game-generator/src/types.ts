@@ -131,6 +131,9 @@ export interface WikidataShipResult {
   length?: { value: string };
   displacement?: { value: string };
   commissioned?: { value: string };
+  decommissioned?: { value: string };
+  status?: { value: string };
+  statusLabel?: { value: string };
   conflict?: { value: string };
   conflictLabel?: { value: string };
   article?: { value: string };

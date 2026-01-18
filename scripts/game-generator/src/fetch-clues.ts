@@ -123,28 +123,10 @@ function buildSpecsClue(ship: SelectedShip): SpecsClue {
  * Build context clue from ship data.
  */
 function buildContextClue(ship: SelectedShip): ContextClue {
-  // Determine status based on available info
-  let status: string | null = null;
-
-  // If conflicts include recent ones, might be active
-  const recentConflicts = ship.conflicts.filter((c) => {
-    const lower = c.toLowerCase();
-    return (
-      lower.includes('iraq') ||
-      lower.includes('afghan') ||
-      lower.includes('gulf') ||
-      lower.includes('syria')
-    );
-  });
-
-  if (recentConflicts.length > 0) {
-    status = 'Active or recently decommissioned';
-  }
-
   return {
     nation: ship.country || 'Unknown',
     conflicts: ship.conflicts,
-    status,
+    status: ship.status,
   };
 }
 

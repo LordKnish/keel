@@ -26,6 +26,8 @@ const SHIP_TYPES = [
 
 /**
  * Build SPARQL query for counting eligible ships.
+ * Requires: image, commissioned date, and at least one conflict.
+ * Length and displacement are optional but preferred.
  */
 function buildCountQuery(excludeIds: string[]): string {
   const excludeFilter =
@@ -42,6 +44,7 @@ WHERE {
   ?ship wdt:P31 ?type .                   # Instance of specific ship type
   ?ship wdt:P18 ?image .                  # Has image
   ?ship wdt:P729 ?commissioned .          # Has commissioned date
+  ?ship wdt:P607 ?conflict .              # Has conflict (REQUIRED for gameplay)
 
   # Filter for ships commissioned after 1950
   FILTER(YEAR(?commissioned) > 1950)
@@ -58,6 +61,8 @@ WHERE {
 
 /**
  * Build SPARQL query for fetching a ship at a specific offset.
+ * Requires: conflict for gameplay.
+ * Length/displacement are optional but preferred.
  */
 function buildShipQuery(excludeIds: string[], offset: number): string {
   const excludeFilter =
@@ -78,12 +83,15 @@ SELECT DISTINCT
   ?length ?displacement
   ?commissioned
   ?conflict ?conflictLabel
+  ?decommissioned
+  ?status ?statusLabel
   ?article
 WHERE {
   VALUES ?type { ${typeValues} }
   ?ship wdt:P31 ?type .                   # Instance of specific ship type
   ?ship wdt:P18 ?image .                  # Has image
   ?ship wdt:P729 ?commissioned .          # Has commissioned date
+  ?ship wdt:P607 ?conflict .              # Has conflict (REQUIRED for gameplay)
 
   # Filter for ships commissioned after 1950
   FILTER(YEAR(?commissioned) > 1950)
@@ -95,7 +103,7 @@ WHERE {
 
   ${excludeFilter}
 
-  # Optional properties
+  # Optional properties (preferred but not required)
   OPTIONAL { ?ship wdt:P289 ?class . }
   OPTIONAL { ?ship wdt:P17 ?country . }
   OPTIONAL {
@@ -104,7 +112,8 @@ WHERE {
   }
   OPTIONAL { ?ship wdt:P2043 ?length . }
   OPTIONAL { ?ship wdt:P2386 ?displacement . }
-  OPTIONAL { ?ship wdt:P607 ?conflict . }
+  OPTIONAL { ?ship wdt:P730 ?decommissioned . }  # Date withdrawn from service
+  OPTIONAL { ?ship wdt:P1308 ?status . }         # Officeholder status
 
   # Get English Wikipedia article if exists
   OPTIONAL {
@@ -195,6 +204,8 @@ export interface SelectedShip {
   length: string | null;
   displacement: string | null;
   commissioned: string | null;
+  decommissioned: string | null;
+  status: string | null;
   conflicts: string[];
   wikipediaTitle: string | null;
 }
@@ -273,6 +284,37 @@ function parseShipResult(results: WikidataShipResult[]): SelectedShip {
     }
   }
 
+  // Determine status from decommissioned date or status label
+  let status: string | null = null;
+  const decommissioned = first.decommissioned?.value
+    ? new Date(first.decommissioned.value).getFullYear().toString()
+    : null;
+
+  if (first.statusLabel?.value) {
+    status = first.statusLabel.value;
+  } else if (decommissioned) {
+    status = `Decommissioned ${decommissioned}`;
+  } else {
+    // If no decommission date, assume active or status unknown
+    // Check if it participated in recent conflicts to infer active status
+    const conflictArray = Array.from(conflicts);
+    const recentConflicts = conflictArray.filter((c) => {
+      const lower = c.toLowerCase();
+      return (
+        lower.includes('iraq') ||
+        lower.includes('afghan') ||
+        lower.includes('gulf') ||
+        lower.includes('syria') ||
+        lower.includes('2000') ||
+        lower.includes('2010') ||
+        lower.includes('2020')
+      );
+    });
+    if (recentConflicts.length > 0) {
+      status = 'Active or recently active';
+    }
+  }
+
   return {
     id: extractEntityId(first.ship.value),
     name: first.shipLabel.value,
@@ -288,6 +330,8 @@ function parseShipResult(results: WikidataShipResult[]): SelectedShip {
     commissioned: first.commissioned?.value
       ? new Date(first.commissioned.value).getFullYear().toString()
       : null,
+    decommissioned,
+    status,
     conflicts: Array.from(conflicts),
     wikipediaTitle,
   };
