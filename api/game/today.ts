@@ -1,10 +1,21 @@
 /**
  * API endpoint to fetch today's game data from the database.
- * GET /api/game/today
+ * GET /api/game/today?mode=main
+ *
+ * Query parameters:
+ *   mode: 'main' | 'ww2' | 'coldwar' | 'carrier' | 'submarine' | 'coastguard'
+ *         Defaults to 'main' if not specified.
+ *
+ * Note: Currently only 'main' mode is supported via database.
+ * Bonus modes (ww2, coldwar, etc.) return 404, prompting fallback to static files.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from '@vercel/postgres';
+
+type GameModeId = 'main' | 'ww2' | 'coldwar' | 'carrier' | 'submarine' | 'coastguard';
+
+const VALID_MODES: GameModeId[] = ['main', 'ww2', 'coldwar', 'carrier', 'submarine', 'coastguard'];
 
 interface GameData {
   date: string;
@@ -44,6 +55,21 @@ export default async function handler(
   }
 
   try {
+    // Parse and validate mode parameter
+    const modeParam = request.query.mode;
+    const mode: GameModeId = typeof modeParam === 'string' && VALID_MODES.includes(modeParam as GameModeId)
+      ? (modeParam as GameModeId)
+      : 'main';
+
+    // Currently only 'main' mode is stored in database
+    // Bonus modes should use static JSON files
+    if (mode !== 'main') {
+      return response.status(404).json({
+        error: `Mode '${mode}' not available via API`,
+        hint: 'Use static file fallback',
+      });
+    }
+
     // Get today's date in UTC
     const today = new Date().toISOString().split('T')[0];
 
