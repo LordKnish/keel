@@ -655,10 +655,9 @@ async function generateLineArtFromUrl(imageUrl: string): Promise<string> {
 
   const lineArtBytes = image.get_bytes();
 
-  // 5. Flatten to white background (remove any transparency)
-  console.log('  Flattening to white background...');
+  // 5. Ensure clean output with transparency preserved
+  console.log('  Processing final output...');
   const lineArt = await sharp(Buffer.from(lineArtBytes))
-    .flatten({ background: { r: 255, g: 255, b: 255 } })
     .png()
     .toBuffer();
 

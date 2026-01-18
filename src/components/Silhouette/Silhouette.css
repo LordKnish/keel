@@ -32,8 +32,6 @@
   width: auto;
   height: auto;
   object-fit: contain;
-  /* Ensure white lines are visible on dark background */
-  filter: brightness(1);
   user-select: none;
   transition: opacity 0.5s ease-in-out;
 }
@@ -99,7 +97,7 @@
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-1) var(--space-2);
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.6);
   border-radius: var(--radius-md);
   opacity: 0;
   transition: opacity 0.2s ease;
