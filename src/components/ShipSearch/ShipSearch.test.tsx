@@ -3,16 +3,16 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ShipSearch } from './ShipSearch';
 
-// Mock ship list data
-const mockShipList = {
+// Mock class list data (ship-list.json now contains classes)
+const mockClassList = {
   generatedAt: '2026-01-18T00:00:00Z',
   count: 5,
-  ships: [
-    { id: 'Q1', name: 'USS Enterprise' },
-    { id: 'Q2', name: 'USS Enterprise (CVN-65)' },
-    { id: 'Q3', name: 'HMS Victory' },
-    { id: 'Q4', name: 'Bismarck' },
-    { id: 'Q5', name: 'Yamato' },
+  classes: [
+    { id: 'class:fletcher-class-destroyer', name: 'Fletcher-class destroyer' },
+    { id: 'class:nimitz-class-carrier', name: 'Nimitz-class aircraft carrier' },
+    { id: 'class:type-23-frigate', name: 'Type 23 frigate' },
+    { id: 'class:bismarck-class-battleship', name: 'Bismarck-class battleship' },
+    { id: 'class:yamato-class-battleship', name: 'Yamato-class battleship' },
   ],
 };
 
@@ -20,7 +20,7 @@ describe('ShipSearch', () => {
   beforeEach(() => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve(mockShipList),
+      json: () => Promise.resolve(mockClassList),
     } as Response);
   });
 
@@ -31,28 +31,28 @@ describe('ShipSearch', () => {
   it('renders the search input', async () => {
     render(<ShipSearch onSelect={vi.fn()} />);
     await waitFor(() => {
-      expect(screen.getByLabelText('Search for a ship')).toBeInTheDocument();
+      expect(screen.getByLabelText('Search for a ship class')).toBeInTheDocument();
     });
   });
 
-  it('shows loading placeholder while ship list loads', () => {
+  it('shows loading placeholder while class list loads', () => {
     render(<ShipSearch onSelect={vi.fn()} />);
-    expect(screen.getByPlaceholderText('Loading ships...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Loading classes...')).toBeInTheDocument();
   });
 
   it('shows normal placeholder after loading', async () => {
     render(<ShipSearch onSelect={vi.fn()} />);
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Type a ship name...')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Type a ship class...')).toBeInTheDocument();
     });
   });
 
-  it('shows error message when ship list fails to load', async () => {
+  it('shows error message when class list fails to load', async () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network error'));
 
     render(<ShipSearch onSelect={vi.fn()} />);
     await waitFor(() => {
-      expect(screen.getByText(/Failed to load ships/)).toBeInTheDocument();
+      expect(screen.getByText(/Failed to load ship classes/)).toBeInTheDocument();
     });
   });
 
@@ -61,37 +61,40 @@ describe('ShipSearch', () => {
     render(<ShipSearch onSelect={vi.fn()} />);
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Type a ship name...')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Type a ship class...')).toBeInTheDocument();
     });
 
-    const input = screen.getByLabelText('Search for a ship');
-    await user.type(input, 'Ent');
+    const input = screen.getByLabelText('Search for a ship class');
+    await user.type(input, 'Fle');
 
     await waitFor(() => {
-      expect(screen.getByText('USS Enterprise')).toBeInTheDocument();
+      expect(screen.getByText('Fletcher-class destroyer')).toBeInTheDocument();
     });
   });
 
-  it('calls onSelect when a ship is selected', async () => {
+  it('calls onSelect when a class is selected', async () => {
     const onSelect = vi.fn();
     const user = userEvent.setup();
     render(<ShipSearch onSelect={onSelect} />);
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Type a ship name...')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Type a ship class...')).toBeInTheDocument();
     });
 
-    const input = screen.getByLabelText('Search for a ship');
-    await user.type(input, 'Enter');
+    const input = screen.getByLabelText('Search for a ship class');
+    await user.type(input, 'Fletcher');
 
     await waitFor(() => {
-      expect(screen.getByText('USS Enterprise')).toBeInTheDocument();
+      expect(screen.getByText('Fletcher-class destroyer')).toBeInTheDocument();
     });
 
     // Click on the first result
-    await user.click(screen.getByText('USS Enterprise'));
+    await user.click(screen.getByText('Fletcher-class destroyer'));
 
-    expect(onSelect).toHaveBeenCalledWith({ id: 'Q1', name: 'USS Enterprise' });
+    expect(onSelect).toHaveBeenCalledWith({
+      id: 'class:fletcher-class-destroyer',
+      name: 'Fletcher-class destroyer',
+    });
   });
 
   it('clears input after selection', async () => {
@@ -99,17 +102,17 @@ describe('ShipSearch', () => {
     render(<ShipSearch onSelect={vi.fn()} />);
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Type a ship name...')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Type a ship class...')).toBeInTheDocument();
     });
 
-    const input = screen.getByLabelText('Search for a ship');
-    await user.type(input, 'Enter');
+    const input = screen.getByLabelText('Search for a ship class');
+    await user.type(input, 'Fletcher');
 
     await waitFor(() => {
-      expect(screen.getByText('USS Enterprise')).toBeInTheDocument();
+      expect(screen.getByText('Fletcher-class destroyer')).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText('USS Enterprise'));
+    await user.click(screen.getByText('Fletcher-class destroyer'));
 
     expect(input).toHaveValue('');
   });
@@ -118,7 +121,7 @@ describe('ShipSearch', () => {
     render(<ShipSearch onSelect={vi.fn()} disabled />);
 
     await waitFor(() => {
-      const input = screen.getByLabelText('Search for a ship');
+      const input = screen.getByLabelText('Search for a ship class');
       expect(input).toBeDisabled();
     });
   });
@@ -128,13 +131,13 @@ describe('ShipSearch', () => {
     render(<ShipSearch onSelect={vi.fn()} />);
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Type a ship name...')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Type a ship class...')).toBeInTheDocument();
     });
 
-    const input = screen.getByLabelText('Search for a ship');
-    await user.type(input, 'E');
+    const input = screen.getByLabelText('Search for a ship class');
+    await user.type(input, 'F');
 
     // Should not show any results
-    expect(screen.queryByText('USS Enterprise')).not.toBeInTheDocument();
+    expect(screen.queryByText('Fletcher-class destroyer')).not.toBeInTheDocument();
   });
 });
