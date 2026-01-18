@@ -205,6 +205,7 @@ function App() {
       )}
       <WinModal
         isOpen={showWinModal}
+        className={gameData.ship.className}
         shipName={gameData.ship.name}
         guessCount={guessResults.length}
         totalTurns={totalTurns}
@@ -276,9 +277,12 @@ function App() {
             <div className="game-result">
               <p className="game-result__text">
                 {isWin
-                  ? `Congratulations! You identified ${gameData.ship.name}!`
-                  : `Game over! The ship was ${gameData.ship.name}.`}
+                  ? `Congratulations! You identified ${gameData.ship.className || gameData.ship.name}!`
+                  : `Game over! It was ${gameData.ship.name}${gameData.ship.className ? ` (${gameData.ship.className})` : ''}.`}
               </p>
+              {isWin && gameData.ship.className && gameData.ship.className !== gameData.ship.name && (
+                <p className="game-result__ship-detail">({gameData.ship.name})</p>
+              )}
               {isWin && !showWinModal && (
                 <button
                   className="game-result__share-button"
