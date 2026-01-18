@@ -10,7 +10,11 @@ export interface GameLayoutProps {
   turnIndicator: ReactNode;
   /** Content for the clues area */
   clues: ReactNode;
-  /** Content for the footer/search area */
+  /** Content for the guess history area */
+  guessHistory?: ReactNode;
+  /** Content for the search/input area */
+  search?: ReactNode;
+  /** Content for the footer/search area (deprecated, use search) */
   footer?: ReactNode;
   /** Additional CSS class name */
   className?: string;
@@ -23,16 +27,22 @@ export interface GameLayoutProps {
  * - Silhouette display
  * - Turn indicator
  * - Clues stack
- * - Footer (search input placeholder)
+ * - Guess history
+ * - Search input (sticky footer)
  */
 export function GameLayout({
   header,
   silhouette,
   turnIndicator,
   clues,
+  guessHistory,
+  search,
   footer,
   className = '',
 }: GameLayoutProps) {
+  // Use search prop if provided, fall back to footer for backwards compatibility
+  const searchContent = search ?? footer;
+
   return (
     <div className={`game-layout ${className}`.trim()}>
       {header && <header className="game-layout__header">{header}</header>}
@@ -47,9 +57,19 @@ export function GameLayout({
         <section className="game-layout__clues" aria-label="Clues">
           {clues}
         </section>
+
+        {guessHistory && (
+          <section className="game-layout__guess-history" aria-label="Guess history">
+            {guessHistory}
+          </section>
+        )}
       </main>
 
-      {footer && <footer className="game-layout__footer">{footer}</footer>}
+      {searchContent && (
+        <footer className="game-layout__footer">
+          <div className="game-layout__search">{searchContent}</div>
+        </footer>
+      )}
     </div>
   );
 }
