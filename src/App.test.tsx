@@ -72,10 +72,11 @@ describe('App', () => {
     });
   });
 
-  it('renders the tagline after loading', async () => {
+  it('renders the mode name as tagline after loading', async () => {
     render(<App />);
     await waitFor(() => {
-      expect(screen.getByText('Daily warship guessing game')).toBeInTheDocument();
+      // Default mode is 'main' which has name 'Daily Keel'
+      expect(screen.getByText('Daily Keel')).toBeInTheDocument();
     });
   });
 
