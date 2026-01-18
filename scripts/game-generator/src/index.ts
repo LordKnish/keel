@@ -65,10 +65,11 @@ async function generateGame(): Promise<void> {
   const shipIdentity: ShipIdentity = {
     id: ship.id,
     name: ship.name,
+    className: ship.className,
     aliases: [], // Could add class name, hull number, etc.
   };
 
-  // Add class name as alias if available
+  // Add class name as alias if available (for backward compatibility)
   if (ship.className) {
     shipIdentity.aliases.push(ship.className);
   }
