@@ -1,9 +1,13 @@
 /**
  * Main entry point for game generation.
- * Generates a complete game data file for one random ship.
+ * Generates game data files for one or more modes.
  *
- * Usage: npm run generate
- * Output: public/game-data.json
+ * Usage:
+ *   npm run generate              # Generate main mode only
+ *   npm run generate -- --all     # Generate all 6 modes
+ *   npm run generate -- --mode=ww2  # Generate specific mode
+ *
+ * Output: public/game-data-{mode}.json
  */
 
 import { writeFile, mkdir } from 'fs/promises';
@@ -15,31 +19,42 @@ import { selectRandomShip } from './select-ship.js';
 import { fetchClues } from './fetch-clues.js';
 import { generateLineArtFromUrl } from './generate-lineart.js';
 import { getUsedShipIds, markShipUsed } from './used-ships.js';
+import { GAME_MODES, ALL_MODE_IDS, type GameModeId } from './modes.js';
 import type { GameData, ShipIdentity } from './types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, '../../..');
-const OUTPUT_PATH = join(PROJECT_ROOT, 'public/game-data.json');
 
 /**
- * Generate today's game data.
+ * Get output path for a mode's game data.
  */
-async function generateGame(): Promise<void> {
+function getOutputPath(mode: GameModeId): string {
+  return join(PROJECT_ROOT, `public/game-data-${mode}.json`);
+}
+
+/**
+ * Generate game data for a specific mode.
+ */
+async function generateGame(mode: GameModeId): Promise<boolean> {
+  const modeConfig = GAME_MODES[mode];
+  const outputPath = getOutputPath(mode);
+
   console.log('='.repeat(60));
-  console.log('Keel Game Generator');
+  console.log(`Generating: ${modeConfig.name}`);
+  console.log(`Description: ${modeConfig.description}`);
   console.log('='.repeat(60));
 
-  // 1. Load used ships
-  const usedIds = await getUsedShipIds();
-  console.log(`\nUsed ships: ${usedIds.length}`);
+  // 1. Load used ships for this mode
+  const usedIds = await getUsedShipIds(mode);
+  console.log(`\nUsed ships in ${mode}: ${usedIds.length}`);
 
   // 2. Select random ship
   console.log('\nSelecting random ship...');
-  const ship = await selectRandomShip(usedIds);
+  const ship = await selectRandomShip(usedIds, modeConfig);
 
   if (!ship) {
-    console.error('No eligible ships found! Check query or reset used ships.');
-    process.exit(1);
+    console.error(`No eligible ships found for ${mode}! Check query or reset used ships.`);
+    return false;
   }
 
   console.log(`\nSelected: ${ship.name} (${ship.id})`);
@@ -58,7 +73,7 @@ async function generateGame(): Promise<void> {
     silhouette = await generateLineArtFromUrl(ship.imageUrl);
   } catch (error) {
     console.error('Failed to generate line art:', error);
-    process.exit(1);
+    return false;
   }
 
   // 5. Build game data
@@ -66,7 +81,7 @@ async function generateGame(): Promise<void> {
     id: ship.id,
     name: ship.name,
     className: ship.className,
-    aliases: [], // Could add class name, hull number, etc.
+    aliases: [],
   };
 
   // Add class name as alias if available (for backward compatibility)
@@ -83,20 +98,20 @@ async function generateGame(): Promise<void> {
 
   // 6. Write output
   console.log('\nWriting game data...');
-  const outputDir = dirname(OUTPUT_PATH);
+  const outputDir = dirname(outputPath);
   if (!existsSync(outputDir)) {
     await mkdir(outputDir, { recursive: true });
   }
-  await writeFile(OUTPUT_PATH, JSON.stringify(gameData, null, 2));
-  console.log(`  Written to: ${OUTPUT_PATH}`);
+  await writeFile(outputPath, JSON.stringify(gameData, null, 2));
+  console.log(`  Written to: ${outputPath}`);
 
-  // 7. Mark ship as used
-  await markShipUsed(ship.id, ship.name);
+  // 7. Mark ship as used in this mode
+  await markShipUsed(ship.id, ship.name, mode);
 
   // Summary
-  console.log('\n' + '='.repeat(60));
-  console.log('Generation Complete!');
-  console.log('='.repeat(60));
+  console.log('\n' + '-'.repeat(60));
+  console.log(`${modeConfig.name} Generation Complete!`);
+  console.log('-'.repeat(60));
   console.log(`Ship: ${ship.name}`);
   console.log(`Date: ${gameData.date}`);
   console.log(`Clues:`);
@@ -106,10 +121,99 @@ async function generateGame(): Promise<void> {
   console.log(`  Trivia: ${clues.trivia ? clues.trivia.substring(0, 60) + '...' : 'N/A'}`);
   console.log(`  Photo: ${clues.photo.substring(0, 60)}...`);
   console.log(`\nSilhouette size: ${Math.round(silhouette.length / 1024)}KB`);
+
+  return true;
+}
+
+/**
+ * Generate game data for all modes.
+ */
+async function generateAllModes(): Promise<void> {
+  console.log('='.repeat(60));
+  console.log('Keel Game Generator - All Modes');
+  console.log('='.repeat(60));
+  console.log(`\nGenerating ${ALL_MODE_IDS.length} modes...\n`);
+
+  const results: { mode: GameModeId; success: boolean }[] = [];
+
+  for (const mode of ALL_MODE_IDS) {
+    try {
+      const success = await generateGame(mode);
+      results.push({ mode, success });
+    } catch (error) {
+      console.error(`\nError generating ${mode}:`, error);
+      results.push({ mode, success: false });
+    }
+    console.log('\n');
+  }
+
+  // Final summary
+  console.log('='.repeat(60));
+  console.log('All Modes Generation Summary');
+  console.log('='.repeat(60));
+  for (const { mode, success } of results) {
+    const modeConfig = GAME_MODES[mode];
+    console.log(`  ${success ? '✓' : '✗'} ${modeConfig.name} (${mode})`);
+  }
+
+  const successCount = results.filter((r) => r.success).length;
+  console.log(`\nTotal: ${successCount}/${results.length} modes generated successfully`);
+
+  if (successCount < results.length) {
+    process.exit(1);
+  }
+}
+
+/**
+ * Parse command line arguments.
+ */
+function parseArgs(): { all: boolean; mode: GameModeId | null } {
+  const args = process.argv.slice(2);
+  let all = false;
+  let mode: GameModeId | null = null;
+
+  for (const arg of args) {
+    if (arg === '--all') {
+      all = true;
+    } else if (arg.startsWith('--mode=')) {
+      const value = arg.split('=')[1] as GameModeId;
+      if (ALL_MODE_IDS.includes(value)) {
+        mode = value;
+      } else {
+        console.error(`Unknown mode: ${value}`);
+        console.error(`Valid modes: ${ALL_MODE_IDS.join(', ')}`);
+        process.exit(1);
+      }
+    }
+  }
+
+  return { all, mode };
+}
+
+/**
+ * Main entry point.
+ */
+async function main(): Promise<void> {
+  const { all, mode } = parseArgs();
+
+  if (all) {
+    await generateAllModes();
+  } else {
+    // Generate single mode (default: main)
+    const targetMode = mode || 'main';
+    console.log('='.repeat(60));
+    console.log('Keel Game Generator');
+    console.log('='.repeat(60));
+
+    const success = await generateGame(targetMode);
+    if (!success) {
+      process.exit(1);
+    }
+  }
 }
 
 // Run
-generateGame().catch((error) => {
+main().catch((error) => {
   console.error('Generation failed:', error);
   process.exit(1);
 });
