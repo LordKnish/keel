@@ -3,8 +3,8 @@
 ## Current Position
 
 **Milestone**: 1 (MVP)
-**Phase**: 4 (Daily Game Generation)
-**Status**: Complete
+**Phase**: 5 (Game UI Components)
+**Status**: In Progress
 
 ## Progress
 
@@ -16,7 +16,7 @@
 | 2 | Data Source Evaluation | Complete | 1/1 |
 | 3 | Project Setup | Complete | 1/1 |
 | 4 | Daily Game Generation | Complete | 1/1 |
-| 5 | Game UI Components | Not Started | 0/0 |
+| 5 | Game UI Components | In Progress | 1/2 |
 | 6 | Game Logic | Not Started | 0/0 |
 | 7 | Polish & Share | Not Started | 0/0 |
 
@@ -38,6 +38,9 @@
 - 2026-01-18: Phase 3 plan 1 executed - full build pipeline working
 - 2026-01-18: Phase 4 plan 1 created (01-PLAN.md) - daily game generation
 - 2026-01-18: Phase 4 plan 1 executed - full generate command working (HMS Achilles)
+- 2026-01-18: Phase 5 research completed (RESEARCH.md) - NYT design philosophy
+- 2026-01-18: Phase 5 plans created (01-PLAN.md, 02-PLAN.md)
+- 2026-01-18: Phase 5 plan 1 executed - UI foundation complete (30 tests pass)
 
 ## Blockers
 
@@ -60,20 +63,27 @@ None
 | Vitest over Jest | 3 | Native Vite integration, faster |
 | ESLint flat config | 3 | Modern config format, simpler setup |
 | Ships must be newer than 1950 | 4 | User requirement for modern vessels |
+| React Aria ComboBox | 5 | Best accessibility, tested with screen readers |
+| Fuse.js for fuzzy search | 5 | Zero deps, handles typos, good for 1000+ ships |
+| CSS keyframes for animations | 5 | No deps, GPU accelerated |
+| Inter + Libre Baskerville fonts | 5 | Web-safe NYT-like alternatives |
 
 ## Notes
 
-**Phase 4 Complete!**
+**Phase 5 Plan 1 Complete!**
 
-Daily game generation command fully working:
-- All 9 tasks completed with per-task commits
-- Generates random ship from Wikidata (>1950, has image)
-- Fetches clue data (specs, context, Wikipedia trivia)
-- Downloads image and generates line art
-- Outputs `public/game-data.json`
-- Tracks used ships to avoid duplicates
+UI Foundation & Core Display Components:
+- Design system with NYT-inspired colors and typography
+- All display components: Silhouette, TurnIndicator, ClueCard, SpecsClue, ContextClue, TriviaClue, PhotoReveal
+- GameLayout responsive container
+- 30 tests passing, build verified
 
-**Test run**: HMS Achilles (Q4353101) - Leander-class frigate, Chile
+**Next: Phase 5 Plan 2 - Ship Search & Guess History**
+- Install React Aria Components + Fuse.js
+- useShipSearch hook (fuzzy matching)
+- ShipSearch component (accessible autocomplete)
+- GuessHistory component
+- Interactive demo
 
 **Generate commands:**
 ```bash
@@ -81,14 +91,6 @@ cd scripts/game-generator
 npm run generate           # Generate today's game
 npm run generate:ship-list # Generate autocomplete list
 ```
-
-**Next: Phase 5 - Game UI Components**
-
-Build React components to display the game:
-- Silhouette display (Turn 1)
-- Ship search/autocomplete
-- Clue reveal components (Turns 2-5)
-- Turn indicator and guess history
 
 ---
 *Last updated: 2026-01-18*

@@ -79,22 +79,23 @@
 
 ---
 
-### Phase 5: Game UI Components
+### Phase 5: Game UI Components 🔄
 **Goal**: Build core UI components for the 5-turn game experience
 
 **Why here**: Now we have game data - can build the visual layer.
 
-**Research**: No
+**Research**: Yes - NYT Games design philosophy, Wordle UI patterns
 
 **Deliverables**:
-- Silhouette display component (Turn 1)
-- Ship search/autocomplete with fuzzy matching
-- Clue reveal components:
-  - Specs card (Turn 2)
-  - Context card (Turn 3)
-  - Trivia card (Turn 4)
-  - Photo reveal (Turn 5)
-- Turn indicator and guess history
+- ✅ Design system (colors, typography, animations)
+- ✅ Silhouette display component (Turn 1)
+- ✅ TurnIndicator (5-turn progression)
+- ✅ ClueCard base + all variants (Specs, Context, Trivia, Photo)
+- ✅ GameLayout responsive container
+- Ship search/autocomplete with fuzzy matching (Plan 2)
+- Guess history (Plan 2)
+
+**Plans**: 1/2 complete (UI foundation done)
 
 ---
 
@@ -138,7 +139,7 @@
 | 2 | Data Source Evaluation | Choose best data sources | Yes | Complete (1 plan) |
 | 3 | Project Setup | Vite/React/TS scaffolding | No | Complete (1 plan) |
 | 4 | Daily Game Generation | Generate one ship's game data | No | Complete (1 plan) |
-| 5 | Game UI Components | Build visual components | No | Not Started |
+| 5 | Game UI Components | Build visual components | Yes | In Progress (1/2) |
 | 6 | Game Logic | Implement 5-turn game loop | No | Not Started |
 | 7 | Polish & Share | Mobile, share, finishing touches | No | Not Started |
 
