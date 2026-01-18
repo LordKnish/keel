@@ -76,9 +76,8 @@ export function WinModal({
 
   if (!isOpen) return null;
 
-  // Display class name as primary, ship name as secondary
+  // Display class name as primary with ship name in parentheses
   const displayName = className || shipName;
-  const showShipName = className && className !== shipName;
 
   return (
     <div className="win-modal-overlay" onClick={onClose}>
@@ -94,10 +93,7 @@ export function WinModal({
 
         <div className="win-modal__content">
           <h2 className="win-modal__title">🎉 Congratulations!</h2>
-          <p className="win-modal__class-name">You identified {displayName}</p>
-          {showShipName && (
-            <p className="win-modal__ship-name">({shipName})</p>
-          )}
+          <p className="win-modal__class-name">You identified {displayName} ({shipName})</p>
 
           <div className="win-modal__stats">
             <div className="win-modal__stat">
