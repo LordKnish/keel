@@ -22,7 +22,7 @@
 ---
 
 ### Phase 2: Data Source Evaluation ✅
-**Goal**: Determine best data source(s) for 1000+ ship database
+**Goal**: Determine best data source(s) for ship data
 
 **Why here**: Need to know what data we're working with before building UI. Data availability shapes what clues we can show.
 
@@ -59,36 +59,58 @@
 
 ---
 
-### Phase 4: Ship Data Pipeline
-**Goal**: Build and populate ship database from chosen sources
+### Phase 4: Daily Game Generation
+**Goal**: Build the generation command that produces a complete game for one ship
 
-**Why here**: Need data before building game UI that displays it.
+**Why here**: Need game data before building UI that displays it.
 
 **Research**: No
 
-**Constraints**:
-- Ships must be newer than 1950
+**Architecture**:
+1. Query Wikidata for random eligible ship (>1950, has image, not previously used)
+2. Fetch full data: specs (class, displacement, length, commissioned), context (nation, conflicts, status), trivia
+3. Download image → generate line art
+4. Output game JSON with all clues + assets
+5. Track used ships to avoid duplicates
 
 **Deliverables**:
-- Ship data types/interfaces
-- Data fetching and processing scripts
-- JSON database with 1000+ ships
-- Pre-generated line art for all ships
+- `generate-game` command that outputs today's game data
+- Game data types (Ship, GameData, Clues)
+- Used ships tracking (JSON file)
+- Line art integration from Phase 1 scripts
+
+**Output format**:
+```json
+{
+  "ship": { "id": "Q12345", "name": "USS Enterprise" },
+  "silhouette": "base64 or path",
+  "clues": {
+    "specs": { "class": "...", "displacement": "...", ... },
+    "context": { "nation": "...", "conflicts": [...], ... },
+    "trivia": "Famous for...",
+    "photo": "url or path"
+  }
+}
+```
 
 ---
 
 ### Phase 5: Game UI Components
-**Goal**: Build core UI components for the game experience
+**Goal**: Build core UI components for the 5-turn game experience
 
-**Why here**: Now we have data and silhouettes - can build the visual layer.
+**Why here**: Now we have game data - can build the visual layer.
 
 **Research**: No
 
 **Deliverables**:
-- Silhouette display component
+- Silhouette display component (Turn 1)
 - Ship search/autocomplete with fuzzy matching
-- Clue reveal components (specs, context, trivia, photo)
-- Turn indicator and progress display
+- Clue reveal components:
+  - Specs card (Turn 2)
+  - Context card (Turn 3)
+  - Trivia card (Turn 4)
+  - Photo reveal (Turn 5)
+- Turn indicator and guess history
 
 ---
 
@@ -100,11 +122,11 @@
 **Research**: No
 
 **Deliverables**:
-- Game state management
+- Game state management (current turn, guesses, win/loss)
 - Turn progression logic
 - Correct/incorrect guess handling
-- Daily ship selection (deterministic algorithm)
 - Win/loss detection
+- Load game data from generated JSON
 
 ---
 
@@ -117,7 +139,7 @@
 
 **Deliverables**:
 - Share card generation (emoji grid like Wordle)
-- Results summary screen
+- Results summary screen ("Success in X turns")
 - Mobile-responsive layout
 - Wikipedia link on loss
 - Local storage for daily progress
@@ -131,10 +153,21 @@
 | 1 | Line Art Generation POC | Prove automated line art works | Yes | Complete (2 plans) |
 | 2 | Data Source Evaluation | Choose best data sources | Yes | Complete (1 plan) |
 | 3 | Project Setup | Vite/React/TS scaffolding | No | Complete (1 plan) |
-| 4 | Ship Data Pipeline | Build 1000+ ship database | No | Not Started |
+| 4 | Daily Game Generation | Generate one ship's game data | No | Not Started |
 | 5 | Game UI Components | Build visual components | No | Not Started |
-| 6 | Game Logic | Implement game loop | No | Not Started |
+| 6 | Game Logic | Implement 5-turn game loop | No | Not Started |
 | 7 | Polish & Share | Mobile, share, finishing touches | No | Not Started |
 
 ---
-*Last updated: 2026-01-18 after Phase 3 completion*
+
+## MVP Success Criteria
+
+By the end of Milestone 1:
+- Run `generate-game` → produces complete game data for one ship
+- Load game in browser → see silhouette, make guesses
+- Play full 5-turn loop with clue reveals
+- Win/loss states work
+- Share results
+
+---
+*Last updated: 2026-01-18 after architecture clarification*

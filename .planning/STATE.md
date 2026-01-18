@@ -76,13 +76,14 @@ Vite + React + TypeScript project fully set up:
 - `npm run typecheck` - Type check
 - `npm test` - Run tests
 
-**Next: Phase 4 - Ship Data Pipeline**
+**Next: Phase 4 - Daily Game Generation**
 
-Expand Wikidata pipeline to 1000+ ships with:
-- Ships newer than 1950 (user requirement)
-- Operator fallback for country data
-- Pre-generated line art for all ships
-- Image format filtering (JPEG only)
+Build `generate-game` command that:
+- Picks random eligible ship from Wikidata (>1950, has image, not used before)
+- Fetches full clue data (specs, context, trivia)
+- Downloads image → generates line art
+- Outputs game JSON ready for the UI
+- Tracks used ships to avoid duplicates
 
 ---
 *Last updated: 2026-01-18*
