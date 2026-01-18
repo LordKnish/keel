@@ -655,9 +655,22 @@ async function generateLineArtFromUrl(imageUrl: string): Promise<string> {
 
   const lineArtBytes = image.get_bytes();
 
-  // 5. Ensure clean output with transparency preserved
-  console.log('  Processing final output...');
-  const lineArt = await sharp(Buffer.from(lineArtBytes))
+  // 5. Thicken the lines using morphological dilation simulation
+  console.log('  Thickening lines...');
+
+  // Convert to grayscale, invert (lines become white), blur to spread, threshold, invert back
+  const processed = await sharp(Buffer.from(lineArtBytes))
+    .grayscale()
+    .negate() // Lines are now white on black
+    .blur(1.2) // Spread the white lines
+    .threshold(200) // Make them solid (lower = thicker lines)
+    .negate() // Back to black lines on white
+    .png()
+    .toBuffer();
+
+  // Flatten to ensure white background
+  const lineArt = await sharp(processed)
+    .flatten({ background: { r: 255, g: 255, b: 255 } })
     .png()
     .toBuffer();
 
