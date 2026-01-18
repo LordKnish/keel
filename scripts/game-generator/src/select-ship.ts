@@ -22,6 +22,7 @@ const SHIP_TYPES = [
   'Q161705',   // frigate
   'Q170013',   // corvette
   'Q2811',     // submarine
+  'Q2607934',  // guided missile destroyer
 ];
 
 /**
