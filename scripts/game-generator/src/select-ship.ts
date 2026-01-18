@@ -26,8 +26,7 @@ const SHIP_TYPES = [
 
 /**
  * Build SPARQL query for counting eligible ships.
- * Requires: image, commissioned date, and at least one conflict.
- * Length and displacement are optional but preferred.
+ * Requires: image, commissioned date, and length OR displacement.
  */
 function buildCountQuery(excludeIds: string[]): string {
   const excludeFilter =
@@ -44,7 +43,11 @@ WHERE {
   ?ship wdt:P31 ?type .                   # Instance of specific ship type
   ?ship wdt:P18 ?image .                  # Has image
   ?ship wdt:P729 ?commissioned .          # Has commissioned date
-  ?ship wdt:P607 ?conflict .              # Has conflict (REQUIRED for gameplay)
+
+  # Require at least length OR displacement
+  OPTIONAL { ?ship wdt:P2043 ?length . }
+  OPTIONAL { ?ship wdt:P2386 ?displacement . }
+  FILTER(BOUND(?length) || BOUND(?displacement))
 
   # Filter for ships commissioned after 1950
   FILTER(YEAR(?commissioned) > 1950)
@@ -61,8 +64,7 @@ WHERE {
 
 /**
  * Build SPARQL query for fetching a ship at a specific offset.
- * Requires: conflict for gameplay.
- * Length/displacement are optional but preferred.
+ * Requires: length OR displacement for specs clue.
  */
 function buildShipQuery(excludeIds: string[], offset: number): string {
   const excludeFilter =
@@ -91,7 +93,11 @@ WHERE {
   ?ship wdt:P31 ?type .                   # Instance of specific ship type
   ?ship wdt:P18 ?image .                  # Has image
   ?ship wdt:P729 ?commissioned .          # Has commissioned date
-  ?ship wdt:P607 ?conflict .              # Has conflict (REQUIRED for gameplay)
+
+  # Require at least length OR displacement
+  OPTIONAL { ?ship wdt:P2043 ?length . }
+  OPTIONAL { ?ship wdt:P2386 ?displacement . }
+  FILTER(BOUND(?length) || BOUND(?displacement))
 
   # Filter for ships commissioned after 1950
   FILTER(YEAR(?commissioned) > 1950)
@@ -103,17 +109,16 @@ WHERE {
 
   ${excludeFilter}
 
-  # Optional properties (preferred but not required)
+  # Optional properties
   OPTIONAL { ?ship wdt:P289 ?class . }
   OPTIONAL { ?ship wdt:P17 ?country . }
   OPTIONAL {
     ?ship wdt:P137 ?operator .
     OPTIONAL { ?operator wdt:P17 ?operatorCountry . }
   }
-  OPTIONAL { ?ship wdt:P2043 ?length . }
-  OPTIONAL { ?ship wdt:P2386 ?displacement . }
-  OPTIONAL { ?ship wdt:P730 ?decommissioned . }  # Date withdrawn from service
-  OPTIONAL { ?ship wdt:P1308 ?status . }         # Officeholder status
+  OPTIONAL { ?ship wdt:P607 ?conflict . }         # Conflicts (optional)
+  OPTIONAL { ?ship wdt:P730 ?decommissioned . }   # Date withdrawn from service
+  OPTIONAL { ?ship wdt:P1308 ?status . }          # Officeholder status
 
   # Get English Wikipedia article if exists
   OPTIONAL {
