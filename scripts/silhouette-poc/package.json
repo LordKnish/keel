@@ -1,0 +1,22 @@
+{
+  "name": "silhouette-poc",
+  "version": "1.0.0",
+  "description": "POC for automated ship silhouette generation",
+  "main": "dist/silhouette.js",
+  "scripts": {
+    "build": "tsc",
+    "generate": "ts-node --esm src/test-runner.ts",
+    "single": "ts-node --esm src/single.ts"
+  },
+  "keywords": ["silhouette", "image-processing", "ship"],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@imgly/background-removal-node": "^1.4.5",
+    "@types/node": "^25.0.9",
+    "sharp": "^0.34.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
