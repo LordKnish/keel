@@ -12,6 +12,17 @@
   background-color: var(--color-silhouette-bg);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.silhouette:hover {
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.silhouette:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .silhouette__image {
@@ -79,10 +90,43 @@
   }
 }
 
+/* Zoom hint overlay */
+.silhouette__zoom-hint {
+  position: absolute;
+  bottom: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: var(--radius-md);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.silhouette:hover .silhouette__zoom-hint,
+.silhouette:focus-visible .silhouette__zoom-hint {
+  opacity: 1;
+}
+
+.silhouette__zoom-icon {
+  font-size: 0.875rem;
+}
+
+.silhouette__zoom-text {
+  font-size: 0.75rem;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+  .silhouette,
   .silhouette__image,
-  .silhouette__photo {
+  .silhouette__photo,
+  .silhouette__zoom-hint {
     transition: none;
   }
 }
