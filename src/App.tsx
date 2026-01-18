@@ -112,12 +112,16 @@ function App() {
     (ship: ShipListEntry) => {
       if (!gameData || isGameComplete) return;
 
-      // Check if the guess is correct
+      // Check if the guess is correct - match by class name, ship name, or aliases
+      const selectedName = ship.name.toLowerCase();
       const isCorrect =
-        ship.id === gameData.ship.id ||
-        ship.name.toLowerCase() === gameData.ship.name.toLowerCase() ||
+        // Match by class name (primary match for class-based guessing)
+        selectedName === gameData.ship.className?.toLowerCase() ||
+        // Match by ship name (also accepted)
+        selectedName === gameData.ship.name.toLowerCase() ||
+        // Match by aliases
         gameData.ship.aliases.some(
-          (alias) => alias.toLowerCase() === ship.name.toLowerCase()
+          (alias) => alias.toLowerCase() === selectedName
         );
 
       // Add to guess history
