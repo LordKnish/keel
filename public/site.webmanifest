@@ -1,0 +1,21 @@
+{
+  "name": "Keel - Daily Warship Guessing Game",
+  "short_name": "Keel",
+  "description": "A daily challenge game for naval history enthusiasts. Identify warships from silhouettes in 5 guesses or less.",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#1a1a2e",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/"
+}

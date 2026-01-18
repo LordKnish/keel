@@ -12,9 +12,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from '@vercel/postgres';
-import cv from '@techstark/opencv-js';
 import sharp from 'sharp';
-import { removeBackground } from '@imgly/background-removal-node';
 
 // ============================================================================
 // Types
@@ -576,31 +574,10 @@ async function fetchClues(ship: SelectedShip): Promise<GameClues> {
 }
 
 // ============================================================================
-// Line Art Generation
+// Line Art Generation (Sharp-only, serverless-friendly)
 // ============================================================================
 
-let cvReady = false;
-async function initCV(): Promise<void> {
-  if (cvReady) return;
-  await new Promise<void>((resolve) => {
-    if (cv.Mat) {
-      resolve();
-    } else {
-      cv.onRuntimeInitialized = () => resolve();
-    }
-  });
-  cvReady = true;
-}
-
-function bufferToMat(buffer: Buffer, width: number, height: number): cv.Mat {
-  const mat = new cv.Mat(height, width, cv.CV_8UC4);
-  mat.data.set(buffer);
-  return mat;
-}
-
-function matToBuffer(mat: cv.Mat): Buffer {
-  return Buffer.from(mat.data);
-}
+const REMOVEBG_API_KEY = process.env.REMOVEBG_API_KEY;
 
 async function downloadImage(url: string): Promise<Buffer> {
   console.log(`  Downloading image from ${url.substring(0, 60)}...`);
@@ -620,95 +597,127 @@ async function downloadImage(url: string): Promise<Buffer> {
   return Buffer.from(await response.arrayBuffer());
 }
 
+async function removeBackgroundWithAPI(imageBuffer: Buffer): Promise<Buffer> {
+  if (!REMOVEBG_API_KEY) {
+    console.warn('  No REMOVEBG_API_KEY set, using edge detection only');
+    return imageBuffer;
+  }
+
+  console.log('  Removing background via remove.bg API...');
+
+  const formData = new FormData();
+  const uint8Array = new Uint8Array(imageBuffer);
+  formData.append('image_file', new Blob([uint8Array]), 'image.png');
+  formData.append('size', 'regular');
+  formData.append('format', 'png');
+
+  const response = await fetch('https://api.remove.bg/v1.0/removebg', {
+    method: 'POST',
+    headers: {
+      'X-Api-Key': REMOVEBG_API_KEY,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.warn(`  remove.bg API failed: ${response.status} - ${errorText}`);
+    console.warn('  Falling back to edge detection only');
+    return imageBuffer;
+  }
+
+  return Buffer.from(await response.arrayBuffer());
+}
+
 async function generateLineArtFromUrl(imageUrl: string): Promise<string> {
   const start = Date.now();
-
-  await initCV();
 
   // 1. Download image
   const inputBuffer = await downloadImage(imageUrl);
 
-  // 2. Preprocess for background removal
+  // 2. Resize and preprocess
   console.log('  Preprocessing image...');
   const preprocessed = await sharp(inputBuffer)
     .resize(800, null, { withoutEnlargement: true })
-    .toColorspace('srgb')
-    .ensureAlpha()
     .png()
     .toBuffer();
 
-  // 3. Remove background
-  console.log('  Removing background (this may take a moment)...');
-  const uint8Array = new Uint8Array(preprocessed);
-  const blob = new Blob([uint8Array], { type: 'image/png' });
-  const resultBlob = await removeBackground(blob);
-  const noBgBuffer = Buffer.from(await resultBlob.arrayBuffer());
+  // 3. Remove background (if API key available)
+  const noBgBuffer = await removeBackgroundWithAPI(preprocessed);
 
-  // Get dimensions
-  const { data, info } = await sharp(noBgBuffer)
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
+  // 4. Generate silhouette using Sharp
+  console.log('  Generating silhouette with Sharp...');
 
-  const { width, height } = info;
+  // Convert to grayscale and apply edge-enhancing pipeline
+  const grayscale = await sharp(noBgBuffer)
+    .grayscale()
+    .normalize() // Enhance contrast
+    .toBuffer();
 
-  // 4. Load into OpenCV
-  console.log('  Generating line art...');
-  const src = bufferToMat(data, width, height);
-  const gray = new cv.Mat();
-  const bilateral = new cv.Mat();
-  const binary = new cv.Mat();
-  const output = new cv.Mat();
+  // Apply median filter for noise reduction (similar to bilateral filter)
+  const filtered = await sharp(grayscale)
+    .median(3)
+    .toBuffer();
 
-  // 5. Convert to grayscale
-  cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+  // Apply threshold to create binary image (dark ship on white background)
+  const binary = await sharp(filtered)
+    .linear(1.5, -30) // Increase contrast
+    .threshold(128) // Binary threshold
+    .toBuffer();
 
-  // 6. Bilateral filter
-  cv.bilateralFilter(gray, bilateral, 9, 75, 75);
+  // Get metadata to check if we have alpha channel
+  const metadata = await sharp(noBgBuffer).metadata();
+  const hasAlpha = metadata.channels === 4;
 
-  // 7. Adaptive threshold
-  cv.adaptiveThreshold(
-    bilateral,
-    binary,
-    255,
-    cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-    cv.THRESH_BINARY,
-    11,
-    2
-  );
+  let lineArt: Buffer;
 
-  // 8. Apply alpha mask
-  cv.cvtColor(binary, output, cv.COLOR_GRAY2RGBA);
+  if (hasAlpha && REMOVEBG_API_KEY) {
+    // If we have alpha channel from background removal, use it as mask
+    const { data: alphaData, info } = await sharp(noBgBuffer)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
 
-  const outputData = matToBuffer(output);
-  for (let i = 0; i < outputData.length; i += 4) {
-    const originalAlpha = data[i + 3];
-    if (originalAlpha === undefined || originalAlpha < 128) {
-      outputData[i] = 255;
-      outputData[i + 1] = 255;
-      outputData[i + 2] = 255;
-      outputData[i + 3] = 255;
-    } else {
-      outputData[i + 3] = 255;
+    const { data: binaryData } = await sharp(binary)
+      .ensureAlpha()
+      .resize(info.width, info.height)
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+
+    // Apply alpha mask: where original was transparent, make white
+    const outputData = Buffer.alloc(binaryData.length);
+    for (let i = 0; i < binaryData.length; i += 4) {
+      const originalAlpha = alphaData[i + 3];
+      if (originalAlpha === undefined || originalAlpha < 128) {
+        // Transparent in original -> white in output
+        outputData[i] = 255;
+        outputData[i + 1] = 255;
+        outputData[i + 2] = 255;
+        outputData[i + 3] = 255;
+      } else {
+        // Keep the binary silhouette
+        outputData[i] = binaryData[i]!;
+        outputData[i + 1] = binaryData[i + 1]!;
+        outputData[i + 2] = binaryData[i + 2]!;
+        outputData[i + 3] = 255;
+      }
     }
+
+    lineArt = await sharp(outputData, {
+      raw: { width: info.width, height: info.height, channels: 4 },
+    })
+      .png()
+      .toBuffer();
+  } else {
+    // No background removal, just use the binary edge image
+    lineArt = await sharp(binary)
+      .flatten({ background: { r: 255, g: 255, b: 255 } })
+      .png()
+      .toBuffer();
   }
 
-  // 9. Export as PNG buffer
-  const lineArt = await sharp(outputData, {
-    raw: { width, height, channels: 4 },
-  })
-    .flatten({ background: { r: 255, g: 255, b: 255 } })
-    .png()
-    .toBuffer();
-
-  // Cleanup OpenCV mats
-  src.delete();
-  gray.delete();
-  bilateral.delete();
-  binary.delete();
-  output.delete();
-
   const timeMs = Date.now() - start;
+  const { width, height } = await sharp(lineArt).metadata();
   console.log(`  Line art generated in ${timeMs}ms (${width}x${height})`);
 
   return lineArt.toString('base64');
