@@ -53,8 +53,20 @@ export interface ShipIdentity {
   id: string;
   /** Primary display name (e.g., "USS Enterprise") */
   name: string;
+  /** Ship class name for matching (e.g., "Fletcher-class destroyer") */
+  className: string | null;
   /** Alternative names/designations for fuzzy matching */
   aliases: string[];
+}
+
+/**
+ * Class entry for search/autocomplete.
+ */
+export interface ClassListEntry {
+  /** Synthetic ID based on normalized class name */
+  id: string;
+  /** Display name (e.g., "Fletcher-class destroyer") */
+  name: string;
 }
 
 /**
