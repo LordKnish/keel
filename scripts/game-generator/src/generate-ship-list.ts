@@ -1,16 +1,16 @@
 /**
- * Generate ship list for autocomplete in the game UI.
- * Queries Wikidata for all eligible ships (>1950, has image).
+ * Generate class list for autocomplete in the game UI.
+ * Queries Wikidata for all unique ship classes from eligible ships (>1950, has image).
  *
  * Usage: npm run generate:ship-list
- * Output: public/ship-list.json
+ * Output: public/ship-list.json (contains classes, not individual ships)
  */
 
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import type { ShipListData, ShipListEntry } from './types.js';
+import type { ClassListData, ClassListEntry } from './types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, '../../..');
@@ -33,147 +33,135 @@ const SHIP_TYPES = [
   'Q2811', // submarine
 ];
 
-interface ShipResult {
-  ship: { value: string };
-  shipLabel: { value: string };
+interface ClassResult {
+  classLabel: { value: string };
 }
 
 /**
- * Extract Wikidata entity ID from URI.
+ * Generate a synthetic ID from a class name.
+ * Normalizes the name to create a stable identifier.
  */
-function extractEntityId(uri: string): string {
-  const match = uri.match(/Q\d+$/);
-  return match ? match[0] : uri;
+function generateClassId(className: string): string {
+  return (
+    'class:' +
+    className
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+  );
 }
 
 /**
- * Fetch all eligible ship names from Wikidata.
- * Uses pagination to handle large result sets.
+ * Fetch all unique ship class names from Wikidata.
  */
-async function fetchAllShips(): Promise<ShipListEntry[]> {
-  const ships: ShipListEntry[] = [];
-  const seenIds = new Set<string>();
-  const batchSize = 1000;
-  let offset = 0;
-  let hasMore = true;
+async function fetchAllClasses(): Promise<ClassListEntry[]> {
+  const classes: ClassListEntry[] = [];
+  const seenNames = new Set<string>();
 
   const typeValues = SHIP_TYPES.map((t) => `wd:${t}`).join(' ');
 
-  while (hasMore) {
-    console.log(`Fetching ships at offset ${offset}...`);
+  console.log('Fetching ship classes from Wikidata...');
 
-    const query = `
-SELECT DISTINCT ?ship ?shipLabel
+  const query = `
+SELECT DISTINCT ?classLabel
 WHERE {
   VALUES ?type { ${typeValues} }
   ?ship wdt:P31 ?type .                   # Instance of specific ship type
   ?ship wdt:P18 ?image .                  # Has image
   ?ship wdt:P729 ?commissioned .          # Has commissioned date
+  ?ship wdt:P289 ?class .                 # Has vessel class
 
   # Filter for ships commissioned after 1950
   FILTER(YEAR(?commissioned) > 1950)
 
-  # Must have English label (not Q-number)
-  ?ship rdfs:label ?shipLabel .
-  FILTER(LANG(?shipLabel) = "en")
-  FILTER(!STRSTARTS(?shipLabel, "Q"))
+  # Must have English class label (not Q-number)
+  ?class rdfs:label ?classLabel .
+  FILTER(LANG(?classLabel) = "en")
+  FILTER(!STRSTARTS(?classLabel, "Q"))
 }
-ORDER BY ?shipLabel
-LIMIT ${batchSize}
-OFFSET ${offset}
-    `.trim();
+ORDER BY ?classLabel
+  `.trim();
 
-    const url = new URL(SPARQL_ENDPOINT);
-    url.searchParams.set('query', query);
-    url.searchParams.set('format', 'json');
+  const url = new URL(SPARQL_ENDPOINT);
+  url.searchParams.set('query', query);
+  url.searchParams.set('format', 'json');
 
-    const response = await fetch(url.toString(), {
-      headers: {
-        Accept: 'application/sparql-results+json',
-        'User-Agent': USER_AGENT,
-      },
-    });
+  const response = await fetch(url.toString(), {
+    headers: {
+      Accept: 'application/sparql-results+json',
+      'User-Agent': USER_AGENT,
+    },
+  });
 
-    if (!response.ok) {
-      throw new Error(`SPARQL query failed: ${response.status}`);
-    }
+  if (!response.ok) {
+    throw new Error(`SPARQL query failed: ${response.status}`);
+  }
 
-    const data = await response.json();
-    const results: ShipResult[] = data.results.bindings;
+  const data = await response.json();
+  const results: ClassResult[] = data.results.bindings;
 
-    if (results.length === 0) {
-      hasMore = false;
-    } else {
-      for (const result of results) {
-        const id = extractEntityId(result.ship.value);
-        if (!seenIds.has(id)) {
-          seenIds.add(id);
-          ships.push({
-            id,
-            name: result.shipLabel.value,
-          });
-        }
-      }
-      offset += batchSize;
-
-      // Safety limit
-      if (offset > 10000) {
-        console.log('Reached safety limit of 10000 ships');
-        hasMore = false;
-      }
-
-      // Rate limiting
-      await new Promise((r) => setTimeout(r, 500));
+  for (const result of results) {
+    const name = result.classLabel.value;
+    // Normalize name for deduplication (case-insensitive)
+    const normalizedName = name.toLowerCase().trim();
+    if (!seenNames.has(normalizedName)) {
+      seenNames.add(normalizedName);
+      classes.push({
+        id: generateClassId(name),
+        name,
+      });
     }
   }
 
-  return ships;
+  return classes;
 }
 
 /**
- * Generate ship list JSON file.
+ * Generate class list JSON file.
  */
-async function generateShipList(): Promise<void> {
+async function generateClassList(): Promise<void> {
   console.log('='.repeat(60));
-  console.log('Keel Ship List Generator');
+  console.log('Keel Class List Generator');
   console.log('='.repeat(60));
 
-  console.log('\nFetching ships from Wikidata...');
-  const ships = await fetchAllShips();
+  console.log('\nFetching classes from Wikidata...');
+  const classes = await fetchAllClasses();
 
-  console.log(`\nFound ${ships.length} ships`);
+  console.log(`\nFound ${classes.length} unique classes`);
 
   // Sort alphabetically
-  ships.sort((a, b) => a.name.localeCompare(b.name));
+  classes.sort((a, b) => a.name.localeCompare(b.name));
 
-  const shipListData: ShipListData = {
+  const classListData: ClassListData = {
     generatedAt: new Date().toISOString(),
-    count: ships.length,
-    ships,
+    count: classes.length,
+    classes,
   };
 
   // Write output
-  console.log('\nWriting ship list...');
+  console.log('\nWriting class list...');
   const outputDir = dirname(OUTPUT_PATH);
   if (!existsSync(outputDir)) {
     await mkdir(outputDir, { recursive: true });
   }
-  await writeFile(OUTPUT_PATH, JSON.stringify(shipListData, null, 2));
+  await writeFile(OUTPUT_PATH, JSON.stringify(classListData, null, 2));
   console.log(`  Written to: ${OUTPUT_PATH}`);
-  console.log(`  File size: ${Math.round(JSON.stringify(shipListData).length / 1024)}KB`);
+  console.log(
+    `  File size: ${Math.round(JSON.stringify(classListData).length / 1024)}KB`
+  );
 
   // Show sample
-  console.log('\nSample ships:');
-  for (const ship of ships.slice(0, 10)) {
-    console.log(`  - ${ship.name}`);
+  console.log('\nSample classes:');
+  for (const cls of classes.slice(0, 10)) {
+    console.log(`  - ${cls.name} (${cls.id})`);
   }
-  if (ships.length > 10) {
-    console.log(`  ... and ${ships.length - 10} more`);
+  if (classes.length > 10) {
+    console.log(`  ... and ${classes.length - 10} more`);
   }
 }
 
 // Run
-generateShipList().catch((error) => {
+generateClassList().catch((error) => {
   console.error('Generation failed:', error);
   process.exit(1);
 });
