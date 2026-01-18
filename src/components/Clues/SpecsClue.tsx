@@ -13,7 +13,8 @@ export interface SpecsClueProps {
 
 /**
  * SpecsClue displays ship technical specifications (Turn 2).
- * Shows: Class, Displacement, Length, Commissioned date.
+ * Shows: Displacement, Length, Commissioned date.
+ * Note: Class removed since players now guess by class name.
  */
 export function SpecsClue({
   data,
@@ -21,7 +22,6 @@ export function SpecsClue({
   className = '',
 }: SpecsClueProps) {
   const specs = [
-    { label: 'Class', value: data.class },
     { label: 'Displacement', value: data.displacement },
     { label: 'Length', value: data.length },
     { label: 'Commissioned', value: data.commissioned },
