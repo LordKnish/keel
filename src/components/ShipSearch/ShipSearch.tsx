@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
   Command,
   CommandInput,
@@ -32,21 +32,22 @@ export function ShipSearch({ onSelect, disabled = false }: ShipSearchProps) {
   const [items, setItems] = useState<ShipListEntry[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync search results when input changes
-  useEffect(() => {
-    if (inputValue.length >= 2) {
-      const results = search(inputValue);
-      setItems(results);
-      setOpen(results.length > 0);
-    } else {
-      setItems([]);
-      setOpen(false);
-    }
-  }, [inputValue, search]);
+  const handleInputChange = useCallback(
+    (value: string) => {
+      setInputValue(value);
 
-  const handleInputChange = useCallback((value: string) => {
-    setInputValue(value);
-  }, []);
+      // Perform search and update items in the same handler
+      if (value.length >= 2) {
+        const results = search(value);
+        setItems(results);
+        setOpen(results.length > 0);
+      } else {
+        setItems([]);
+        setOpen(false);
+      }
+    },
+    [search]
+  );
 
   const handleSelect = useCallback(
     (shipId: string) => {

@@ -65,7 +65,6 @@ const MAX_RESULTS = 8;
  * const results = search('Enter'); // Returns ships matching "Enter"
  */
 export function useShipSearch(): UseShipSearchReturn {
-  const [ships, setShips] = useState<ShipListEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const fuseRef = useRef<Fuse<ShipListEntry> | null>(null);
@@ -79,7 +78,6 @@ export function useShipSearch(): UseShipSearchReturn {
           throw new Error(`Failed to load ship list: ${response.status}`);
         }
         const data: ShipListData = await response.json();
-        setShips(data.ships);
         fuseRef.current = new Fuse(data.ships, FUSE_OPTIONS);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Unknown error loading ship list'));
