@@ -1,9 +1,10 @@
 /**
  * Random ship selector from Wikidata.
- * Finds eligible ships (>1950, has image, not used) and picks one randomly.
+ * Finds eligible ships based on mode filters and picks one randomly.
  */
 
 import type { WikidataShipResult } from './types.js';
+import type { ModeConfig } from './modes.js';
 
 const SPARQL_ENDPOINT = 'https://query.wikidata.org/sparql';
 
@@ -11,31 +12,33 @@ const USER_AGENT =
   'Mozilla/5.0 (compatible; KeelGame/1.0; +https://github.com/keel-game)';
 
 /**
- * Ship type Wikidata IDs to query.
- * Using specific types instead of subclass traversal for performance.
+ * Build year filter for SPARQL query based on mode config.
  */
-const SHIP_TYPES = [
-  'Q174736',   // destroyer
-  'Q182531',   // battleship
-  'Q17205',    // aircraft carrier
-  'Q104843',   // cruiser
-  'Q161705',   // frigate
-  'Q170013',   // corvette
-  'Q2811',     // submarine
-  'Q2607934',  // guided missile destroyer
-];
+function buildYearFilter(mode: ModeConfig): string {
+  if (mode.yearMin !== null && mode.yearMax !== null) {
+    return `FILTER(YEAR(?commissioned) >= ${mode.yearMin} && YEAR(?commissioned) <= ${mode.yearMax})`;
+  }
+  if (mode.yearMin !== null) {
+    return `FILTER(YEAR(?commissioned) >= ${mode.yearMin})`;
+  }
+  if (mode.yearMax !== null) {
+    return `FILTER(YEAR(?commissioned) <= ${mode.yearMax})`;
+  }
+  return ''; // No year filter
+}
 
 /**
  * Build SPARQL query for counting eligible ships.
  * Requires: image, commissioned date, and length OR displacement.
  */
-function buildCountQuery(excludeIds: string[]): string {
+function buildCountQuery(excludeIds: string[], mode: ModeConfig): string {
   const excludeFilter =
     excludeIds.length > 0
       ? `FILTER(?ship NOT IN (${excludeIds.map((id) => `wd:${id}`).join(', ')}))`
       : '';
 
-  const typeValues = SHIP_TYPES.map((t) => `wd:${t}`).join(' ');
+  const typeValues = mode.shipTypes.map((t) => `wd:${t}`).join(' ');
+  const yearFilter = buildYearFilter(mode);
 
   return `
 SELECT (COUNT(DISTINCT ?ship) AS ?count)
@@ -51,8 +54,7 @@ WHERE {
   OPTIONAL { ?ship wdt:P2386 ?displacement . }
   FILTER(BOUND(?length) || BOUND(?displacement))
 
-  # Filter for ships commissioned after 1980
-  FILTER(YEAR(?commissioned) > 1980)
+  ${yearFilter}
 
   # Must have English label (not Q-number)
   ?ship rdfs:label ?label .
@@ -68,13 +70,14 @@ WHERE {
  * Build SPARQL query for fetching a ship at a specific offset.
  * Requires: length OR displacement for specs clue.
  */
-function buildShipQuery(excludeIds: string[], offset: number): string {
+function buildShipQuery(excludeIds: string[], offset: number, mode: ModeConfig): string {
   const excludeFilter =
     excludeIds.length > 0
       ? `FILTER(?ship NOT IN (${excludeIds.map((id) => `wd:${id}`).join(', ')}))`
       : '';
 
-  const typeValues = SHIP_TYPES.map((t) => `wd:${t}`).join(' ');
+  const typeValues = mode.shipTypes.map((t) => `wd:${t}`).join(' ');
+  const yearFilter = buildYearFilter(mode);
 
   return `
 SELECT DISTINCT
@@ -102,8 +105,7 @@ WHERE {
   OPTIONAL { ?ship wdt:P2386 ?displacement . }
   FILTER(BOUND(?length) || BOUND(?displacement))
 
-  # Filter for ships commissioned after 1980
-  FILTER(YEAR(?commissioned) > 1980)
+  ${yearFilter}
 
   # Must have English label
   ?ship rdfs:label ?label .
@@ -160,10 +162,10 @@ async function executeSparql<T>(query: string): Promise<T[]> {
 }
 
 /**
- * Get count of eligible ships.
+ * Get count of eligible ships for a mode.
  */
-async function getEligibleShipCount(excludeIds: string[]): Promise<number> {
-  const query = buildCountQuery(excludeIds);
+async function getEligibleShipCount(excludeIds: string[], mode: ModeConfig): Promise<number> {
+  const query = buildCountQuery(excludeIds, mode);
   const results = await executeSparql<{ count: { value: string } }>(query);
 
   if (results.length === 0) {
@@ -218,15 +220,16 @@ export interface SelectedShip {
 }
 
 /**
- * Select a random eligible ship from Wikidata.
+ * Select a random eligible ship from Wikidata for a specific mode.
  * Returns null if no eligible ships are available.
  */
 export async function selectRandomShip(
-  excludeIds: string[]
+  excludeIds: string[],
+  mode: ModeConfig
 ): Promise<SelectedShip | null> {
-  console.log(`Counting eligible ships (excluding ${excludeIds.length})...`);
+  console.log(`Counting eligible ships for ${mode.name} (excluding ${excludeIds.length})...`);
 
-  const count = await getEligibleShipCount(excludeIds);
+  const count = await getEligibleShipCount(excludeIds, mode);
   console.log(`Found ${count} eligible ships`);
 
   if (count === 0) {
@@ -237,7 +240,7 @@ export async function selectRandomShip(
   const offset = Math.floor(Math.random() * count);
   console.log(`Selecting ship at offset ${offset}...`);
 
-  const query = buildShipQuery(excludeIds, offset);
+  const query = buildShipQuery(excludeIds, offset, mode);
   const results = await executeSparql<WikidataShipResult>(query);
 
   if (results.length === 0) {
@@ -245,7 +248,7 @@ export async function selectRandomShip(
     // Try a different offset
     const newOffset = Math.floor(Math.random() * count);
     const retryResults = await executeSparql<WikidataShipResult>(
-      buildShipQuery(excludeIds, newOffset)
+      buildShipQuery(excludeIds, newOffset, mode)
     );
     if (retryResults.length === 0) {
       return null;
