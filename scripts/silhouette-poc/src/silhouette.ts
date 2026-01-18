@@ -41,7 +41,10 @@ export async function generateSilhouette(
     // 1. Read and preprocess image
     const inputBuffer = await readFile(inputPath);
 
+    // Ensure RGBA (4-channel) colorspace - required by @imgly background removal
     let preprocessor = sharp(inputBuffer)
+      .toColorspace('srgb')
+      .ensureAlpha()  // Convert to 4 channels (RGBA)
       .resize(options.outputWidth ?? 1000, null, { withoutEnlargement: true })
       .modulate({ brightness: options.preprocessBrightness ?? 1.1 })
       .sharpen();
@@ -53,8 +56,10 @@ export async function generateSilhouette(
     const preprocessed = await preprocessor.png().toBuffer();
 
     // 2. Remove background using AI segmentation
-    const blob = await removeBackground(preprocessed);
-    const noBgBuffer = Buffer.from(await blob.arrayBuffer());
+    // Note: @imgly requires Blob input, not raw Buffer
+    const inputBlob = new Blob([preprocessed], { type: 'image/png' });
+    const resultBlob = await removeBackground(inputBlob);
+    const noBgBuffer = Buffer.from(await resultBlob.arrayBuffer());
 
     // 3. Convert to binary silhouette
     const { data, info } = await sharp(noBgBuffer)
@@ -110,8 +115,10 @@ export async function generateSilhouetteFromBuffer(
   const start = Date.now();
 
   try {
-    // 1. Preprocess
+    // 1. Preprocess (ensure RGBA 4-channel for @imgly compatibility)
     let preprocessor = sharp(inputBuffer)
+      .toColorspace('srgb')
+      .ensureAlpha()
       .resize(options.outputWidth ?? 1000, null, { withoutEnlargement: true })
       .modulate({ brightness: options.preprocessBrightness ?? 1.1 })
       .sharpen();
@@ -122,9 +129,10 @@ export async function generateSilhouetteFromBuffer(
 
     const preprocessed = await preprocessor.png().toBuffer();
 
-    // 2. Remove background
-    const blob = await removeBackground(preprocessed);
-    const noBgBuffer = Buffer.from(await blob.arrayBuffer());
+    // 2. Remove background (requires Blob input)
+    const inputBlob = new Blob([preprocessed], { type: 'image/png' });
+    const resultBlob = await removeBackground(inputBlob);
+    const noBgBuffer = Buffer.from(await resultBlob.arrayBuffer());
 
     // 3. Convert to silhouette
     const { data, info } = await sharp(noBgBuffer)

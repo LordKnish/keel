@@ -2,7 +2,7 @@
  * Process a single image for quick testing.
  * Usage: npm run single -- <input-path> [output-path]
  */
-import { generateSilhouette } from './silhouette.js';
+import { generateSilhouette } from './silhouette.ts';
 
 async function main() {
   const args = process.argv.slice(2);

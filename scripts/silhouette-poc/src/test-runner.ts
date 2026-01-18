@@ -1,7 +1,7 @@
 import { readFile, mkdir, writeFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { generateSilhouette, SilhouetteResult } from './silhouette.js';
+import { generateSilhouette, type SilhouetteResult } from './silhouette.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
