@@ -13,6 +13,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from '@vercel/postgres';
 import sharp from 'sharp';
+import * as photon from '@silvia-odwyer/photon-node';
 
 // ============================================================================
 // Types
@@ -574,7 +575,7 @@ async function fetchClues(ship: SelectedShip): Promise<GameClues> {
 }
 
 // ============================================================================
-// Line Art Generation (Sharp-only, serverless-friendly)
+// Line Art Generation (Photon + Sharp for preprocessing)
 // ============================================================================
 
 const REMOVEBG_API_KEY = process.env.REMOVEBG_API_KEY;
@@ -635,7 +636,7 @@ async function generateLineArtFromUrl(imageUrl: string): Promise<string> {
   // 1. Download image
   const inputBuffer = await downloadImage(imageUrl);
 
-  // 2. Resize and preprocess
+  // 2. Resize and preprocess with Sharp
   console.log('  Preprocessing image...');
   const preprocessed = await sharp(inputBuffer)
     .resize(800, null, { withoutEnlargement: true })
@@ -645,76 +646,15 @@ async function generateLineArtFromUrl(imageUrl: string): Promise<string> {
   // 3. Remove background (if API key available)
   const noBgBuffer = await removeBackgroundWithAPI(preprocessed);
 
-  // 4. Generate silhouette using Sharp
-  console.log('  Generating silhouette with Sharp...');
+  // 4. Generate line art using Photon (laplace + invert)
+  console.log('  Generating line art with Photon (laplace + invert)...');
 
-  // Convert to grayscale and apply edge-enhancing pipeline
-  const grayscale = await sharp(noBgBuffer)
-    .grayscale()
-    .normalize() // Enhance contrast
-    .toBuffer();
+  const image = photon.PhotonImage.new_from_byteslice(new Uint8Array(noBgBuffer));
+  photon.laplace(image);
+  photon.invert(image);
 
-  // Apply median filter for noise reduction (similar to bilateral filter)
-  const filtered = await sharp(grayscale)
-    .median(3)
-    .toBuffer();
-
-  // Apply threshold to create binary image (dark ship on white background)
-  const binary = await sharp(filtered)
-    .linear(1.5, -30) // Increase contrast
-    .threshold(128) // Binary threshold
-    .toBuffer();
-
-  // Get metadata to check if we have alpha channel
-  const metadata = await sharp(noBgBuffer).metadata();
-  const hasAlpha = metadata.channels === 4;
-
-  let lineArt: Buffer;
-
-  if (hasAlpha && REMOVEBG_API_KEY) {
-    // If we have alpha channel from background removal, use it as mask
-    const { data: alphaData, info } = await sharp(noBgBuffer)
-      .ensureAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-
-    const { data: binaryData } = await sharp(binary)
-      .ensureAlpha()
-      .resize(info.width, info.height)
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-
-    // Apply alpha mask: where original was transparent, make white
-    const outputData = Buffer.alloc(binaryData.length);
-    for (let i = 0; i < binaryData.length; i += 4) {
-      const originalAlpha = alphaData[i + 3];
-      if (originalAlpha === undefined || originalAlpha < 128) {
-        // Transparent in original -> white in output
-        outputData[i] = 255;
-        outputData[i + 1] = 255;
-        outputData[i + 2] = 255;
-        outputData[i + 3] = 255;
-      } else {
-        // Keep the binary silhouette
-        outputData[i] = binaryData[i]!;
-        outputData[i + 1] = binaryData[i + 1]!;
-        outputData[i + 2] = binaryData[i + 2]!;
-        outputData[i + 3] = 255;
-      }
-    }
-
-    lineArt = await sharp(outputData, {
-      raw: { width: info.width, height: info.height, channels: 4 },
-    })
-      .png()
-      .toBuffer();
-  } else {
-    // No background removal, just use the binary edge image
-    lineArt = await sharp(binary)
-      .flatten({ background: { r: 255, g: 255, b: 255 } })
-      .png()
-      .toBuffer();
-  }
+  const lineArtBytes = image.get_bytes();
+  const lineArt = Buffer.from(lineArtBytes);
 
   const timeMs = Date.now() - start;
   const { width, height } = await sharp(lineArt).metadata();
@@ -731,15 +671,31 @@ export default async function handler(
   request: VercelRequest,
   response: VercelResponse
 ): Promise<VercelResponse> {
-  // Verify cron secret for security (Vercel sends this header for cron jobs)
+  // Check for manual trigger via query param
+  const isManualTrigger = request.query.manual === 'true';
+  const forceDate = typeof request.query.date === 'string' ? request.query.date : null;
+
+  // Verify authorization
+  // - Cron jobs use Bearer token in Authorization header
+  // - Manual triggers can use ?secret=XXX query param
   const authHeader = request.headers.authorization;
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  const querySecret = request.query.secret;
+
+  const isAuthorized =
+    !CRON_SECRET || // No secret configured = allow all
+    authHeader === `Bearer ${CRON_SECRET}` || // Cron job auth
+    querySecret === CRON_SECRET; // Manual trigger auth
+
+  if (!isAuthorized) {
     return response.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
     console.log('='.repeat(60));
-    console.log('Keel Game Generator (Vercel Cron)');
+    console.log(`Keel Game Generator (${isManualTrigger ? 'Manual Trigger' : 'Vercel Cron'})`);
+    if (forceDate) {
+      console.log(`Forcing date: ${forceDate}`);
+    }
     console.log('='.repeat(60));
 
     // 1. Load used ships from database
@@ -790,8 +746,11 @@ export default async function handler(
       shipIdentity.aliases.push(ship.className);
     }
 
+    // Use forced date if provided, otherwise use today
+    const gameDate = forceDate || new Date().toISOString().split('T')[0];
+
     const gameData: GameData = {
-      date: new Date().toISOString().split('T')[0],
+      date: gameDate,
       ship: shipIdentity,
       silhouette: `data:image/png;base64,${silhouette}`,
       clues,
