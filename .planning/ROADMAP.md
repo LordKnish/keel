@@ -2,17 +2,22 @@
 
 ## Milestone 1: MVP
 
-### Phase 1: Silhouette Generation POC
-**Goal**: Prove automated silhouette generation works at quality needed for gameplay
+### Phase 1: Line Art Generation POC ✅
+**Goal**: Prove automated line art generation works at quality needed for gameplay
 
-**Why first**: This is the core differentiator. If we can't generate recognizable silhouettes automatically, the game concept doesn't work. Must validate before building anything else.
+**Why first**: This is the core differentiator. If we can't generate recognizable ship illustrations automatically, the game concept doesn't work. Must validate before building anything else.
 
-**Research**: Yes - evaluate image processing approaches, test with varied ship photos
+**Research**: Yes - evaluate programmatic image processing approaches (edge detection, background removal)
+
+**Approach**: Purely programmatic - no AI image generation APIs. Must work offline with deterministic results.
 
 **Deliverables**:
-- Working silhouette generation script
-- Test results on 20+ varied ship images
-- Documented algorithm and quality metrics
+- ✅ Working line art generation script (OpenCV.js bilateral + adaptive threshold)
+- ✅ Background removal (@imgly) + line art pipeline
+- ✅ Test results on 31 ship images (100% success rate)
+- ✅ Documented algorithm and quality metrics
+
+**Plans**: 2/2 complete (silhouettes + line art)
 
 ---
 
@@ -110,7 +115,7 @@
 
 | # | Phase | Goal | Research | Status |
 |---|-------|------|----------|--------|
-| 1 | Silhouette Generation POC | Prove automated silhouettes work | Yes | Complete |
+| 1 | Line Art Generation POC | Prove automated line art works | Yes | Complete (2 plans) |
 | 2 | Data Source Evaluation | Choose best data sources | Yes | Not Started |
 | 3 | Project Setup | Vite/React/TS scaffolding | No | Not Started |
 | 4 | Ship Data Pipeline | Build 1000+ ship database | No | Not Started |
@@ -119,4 +124,4 @@
 | 7 | Polish & Share | Mobile, share, finishing touches | No | Not Started |
 
 ---
-*Last updated: 2026-01-18 after Phase 1 completion*
+*Last updated: 2026-01-18 after Phase 1 Plan 2 completion*
