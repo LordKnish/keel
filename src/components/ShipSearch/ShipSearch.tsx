@@ -1,16 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandItem,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverAnchor,
-} from '@/components/ui/popover';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useShipSearch, type ShipListEntry } from '../../hooks/useShipSearch';
 import './ShipSearch.css';
 
@@ -19,26 +7,32 @@ export interface ShipSearchProps {
   onSelect: (ship: ShipListEntry) => void;
   /** Whether the search is disabled */
   disabled?: boolean;
+  /** Previously guessed ship IDs to exclude from suggestions */
+  excludeIds?: string[];
 }
 
 /**
- * Ship search autocomplete component using shadcn Command (cmdk).
+ * Ship search autocomplete component.
  * Provides accessible fuzzy search for ship names.
  */
-export function ShipSearch({ onSelect, disabled = false }: ShipSearchProps) {
+export function ShipSearch({ onSelect, disabled = false, excludeIds = [] }: ShipSearchProps) {
   const { search, isLoading, error } = useShipSearch();
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [items, setItems] = useState<ShipListEntry[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
 
   const handleInputChange = useCallback(
-    (value: string) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
       setInputValue(value);
+      setSelectedIndex(0);
 
       // Perform search and update items in the same handler
       if (value.length >= 2) {
-        const results = search(value);
+        const results = search(value).filter(item => !excludeIds.includes(item.id));
         setItems(results);
         setOpen(results.length > 0);
       } else {
@@ -46,28 +40,79 @@ export function ShipSearch({ onSelect, disabled = false }: ShipSearchProps) {
         setOpen(false);
       }
     },
-    [search]
+    [search, excludeIds]
   );
 
   const handleSelect = useCallback(
-    (shipId: string) => {
-      const selected = items.find((item) => item.id === shipId);
-      if (selected) {
-        onSelect(selected);
-        setInputValue('');
-        setItems([]);
-        setOpen(false);
-      }
+    (ship: ShipListEntry) => {
+      onSelect(ship);
+      setInputValue('');
+      setItems([]);
+      setOpen(false);
+      setSelectedIndex(0);
     },
-    [items, onSelect]
+    [onSelect]
   );
 
-  // Close popover on escape
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      setOpen(false);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!open || items.length === 0) {
+        if (e.key === 'Escape') {
+          setOpen(false);
+        }
+        return;
+      }
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev + 1) % items.length);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev - 1 + items.length) % items.length);
+          break;
+        case 'Enter': {
+          e.preventDefault();
+          const selected = items[selectedIndex];
+          if (selected) {
+            handleSelect(selected);
+          }
+          break;
+        }
+        case 'Escape':
+          setOpen(false);
+          break;
+      }
+    },
+    [open, items, selectedIndex, handleSelect]
+  );
+
+  // Scroll selected item into view
+  useEffect(() => {
+    if (open && listRef.current) {
+      const selectedItem = listRef.current.children[selectedIndex] as HTMLElement;
+      if (selectedItem) {
+        selectedItem.scrollIntoView({ block: 'nearest' });
+      }
     }
-  }, []);
+  }, [selectedIndex, open]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (inputRef.current && !inputRef.current.contains(target) &&
+          listRef.current && !listRef.current.contains(target)) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [open]);
 
   if (error) {
     return (
@@ -80,48 +125,61 @@ export function ShipSearch({ onSelect, disabled = false }: ShipSearchProps) {
   }
 
   return (
-    <div className="ship-search" onKeyDown={handleKeyDown}>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverAnchor asChild>
-          <Command
-            className="ship-search__command"
-            shouldFilter={false}
-          >
-            <CommandInput
-              ref={inputRef}
-              className="ship-search__input"
-              placeholder={isLoading ? 'Loading ships...' : 'Type a ship name...'}
-              value={inputValue}
-              onValueChange={handleInputChange}
-              disabled={disabled || isLoading}
-              aria-label="Search for a ship"
-            />
-          </Command>
-        </PopoverAnchor>
-        <PopoverContent
-          className="ship-search__popover"
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          onCloseAutoFocus={(e) => e.preventDefault()}
-          align="start"
-          sideOffset={4}
+    <div className="ship-search">
+      <div className="ship-search__input-wrapper">
+        <svg
+          className="ship-search__icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
         >
-          <Command shouldFilter={false}>
-            <CommandList className="ship-search__list">
-              <CommandEmpty>No ships found</CommandEmpty>
-              {items.map((item) => (
-                <CommandItem
-                  key={item.id}
-                  value={item.id}
-                  onSelect={handleSelect}
-                  className="ship-search__item"
-                >
-                  {item.name}
-                </CommandItem>
-              ))}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+        <input
+          ref={inputRef}
+          type="text"
+          className="ship-search__input"
+          placeholder={isLoading ? 'Loading ships...' : 'Type a ship name...'}
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          disabled={disabled || isLoading}
+          aria-label="Search for a ship"
+          aria-expanded={open}
+          aria-autocomplete="list"
+          aria-controls={open ? 'ship-search-list' : undefined}
+          autoComplete="off"
+        />
+      </div>
+      {open && items.length > 0 && (
+        <ul
+          ref={listRef}
+          id="ship-search-list"
+          className="ship-search__list"
+          role="listbox"
+        >
+          {items.map((item, index) => (
+            <li
+              key={item.id}
+              className={`ship-search__item ${index === selectedIndex ? 'ship-search__item--selected' : ''}`}
+              role="option"
+              aria-selected={index === selectedIndex}
+              onClick={() => handleSelect(item)}
+              onMouseEnter={() => setSelectedIndex(index)}
+            >
+              {item.name}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

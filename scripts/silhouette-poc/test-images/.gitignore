@@ -1,4 +1,0 @@
-# Image files are downloaded, not tracked
-*.jpg
-*.png
-!manifest.json

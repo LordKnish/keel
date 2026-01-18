@@ -37,10 +37,12 @@
 /* Game result message */
 .game-result {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: var(--space-3);
   padding: var(--space-4);
-  background-color: var(--color-success);
+  background-color: var(--color-card-specs);
   border-radius: var(--radius-md);
   animation: cardReveal 0.4s ease-out forwards;
 }
@@ -48,8 +50,33 @@
 .game-result__text {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
-  color: white;
+  color: var(--color-text);
   text-align: center;
+}
+
+.game-result__share-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: white;
+  background-color: var(--color-success);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.game-result__share-button:hover {
+  background-color: #5a9a54;
+  transform: scale(1.02);
+}
+
+.game-result__share-button:active {
+  transform: scale(0.98);
 }
 
 /* Tablet and up */

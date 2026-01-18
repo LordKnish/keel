@@ -3,6 +3,7 @@
    ========================================================================== */
 
 .silhouette {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -23,6 +24,32 @@
   /* Ensure white lines are visible on dark background */
   filter: brightness(1);
   user-select: none;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.silhouette__image--hidden {
+  opacity: 0;
+}
+
+.silhouette__photo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: block;
+  max-width: calc(100% - var(--space-8));
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.silhouette__photo--visible {
+  opacity: 1;
 }
 
 /* Tablet and up */
@@ -34,11 +61,28 @@
   .silhouette__image {
     max-height: 350px;
   }
+
+  .silhouette__photo {
+    max-width: calc(100% - var(--space-12));
+    max-height: 350px;
+  }
 }
 
 /* Desktop */
 @media (min-width: 1024px) {
   .silhouette__image {
     max-height: 400px;
+  }
+
+  .silhouette__photo {
+    max-height: 400px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .silhouette__image,
+  .silhouette__photo {
+    transition: none;
   }
 }

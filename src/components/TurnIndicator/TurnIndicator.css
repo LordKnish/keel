@@ -35,9 +35,9 @@
   background-color: var(--color-success);
 }
 
-/* Wrong guess - dark gray */
+/* Wrong guess - red */
 .turn-indicator__dot--wrong {
-  background-color: var(--color-wrong);
+  background-color: var(--color-error);
 }
 
 /* Tablet and up - larger dots */

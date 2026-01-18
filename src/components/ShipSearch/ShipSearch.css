@@ -1,8 +1,9 @@
 /* ==========================================================================
-   Ship Search - Autocomplete Component (shadcn Command)
+   Ship Search - Autocomplete Component
    ========================================================================== */
 
 .ship-search {
+  position: relative;
   width: 100%;
 }
 
@@ -17,25 +18,35 @@
 }
 
 /* ==========================================================================
-   Command Container
+   Input Wrapper
    ========================================================================== */
 
-.ship-search__command {
+.ship-search__input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   width: 100%;
   background-color: white;
   border: 2px solid var(--color-border);
   border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.ship-search__command:has(input:focus) {
+.ship-search__input-wrapper:focus-within {
   border-color: var(--color-focus);
   box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.15);
 }
 
-.ship-search__command:has(input:disabled) {
+.ship-search__input-wrapper:has(input:disabled) {
   background-color: var(--color-background);
   opacity: 0.7;
+}
+
+.ship-search__icon {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  opacity: 0.5;
 }
 
 /* ==========================================================================
@@ -43,48 +54,44 @@
    ========================================================================== */
 
 .ship-search__input {
+  flex: 1;
   width: 100%;
+  border: none;
+  background: transparent;
   font-family: var(--font-body);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   color: var(--color-text);
+  outline: none;
 }
 
-/* Override cmdk default input wrapper styling */
-.ship-search__command [data-slot="command-input-wrapper"] {
-  border: none;
-  padding: var(--space-3) var(--space-4);
-}
-
-/* Override cmdk input styling */
-.ship-search__command [data-slot="command-input"] {
-  font-size: var(--font-size-base);
-}
-
-.ship-search__command [data-slot="command-input"]::placeholder {
+.ship-search__input::placeholder {
   color: var(--color-text-muted);
 }
 
+.ship-search__input:disabled {
+  cursor: not-allowed;
+}
+
 /* ==========================================================================
-   Popover & List
+   Dropdown List
    ========================================================================== */
 
-.ship-search__popover {
-  width: var(--radix-popover-trigger-width);
-  min-width: 200px;
-  max-height: 320px;
+.ship-search__list {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  margin-bottom: var(--space-1);
+  max-height: 300px;
   overflow-y: auto;
-  padding: 0;
+  padding: var(--space-1);
+  background-color: white;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   z-index: var(--z-dropdown);
-}
-
-.ship-search__list {
-  max-height: 300px;
-  overflow-y: auto;
-  padding: var(--space-1);
+  list-style: none;
 }
 
 /* ==========================================================================
@@ -103,17 +110,7 @@
   transition: background-color var(--transition-fast);
 }
 
-.ship-search__item[data-selected="true"] {
+.ship-search__item:hover,
+.ship-search__item--selected {
   background-color: var(--color-hover);
-}
-
-/* ==========================================================================
-   Empty State
-   ========================================================================== */
-
-.ship-search__list [data-slot="command-empty"] {
-  padding: var(--space-4);
-  text-align: center;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
 }

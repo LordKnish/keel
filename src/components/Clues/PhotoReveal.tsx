@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { ClueCard } from './ClueCard';
 import './PhotoReveal.css';
 
 export interface PhotoRevealProps {
-  /** URL of the ship photo */
+  /** URL of the ship photo (not used, photo displays in silhouette area) */
   photoUrl: string;
   /** Ship name for alt text */
   shipName: string;
@@ -14,27 +13,13 @@ export interface PhotoRevealProps {
 }
 
 /**
- * PhotoReveal displays the original ship photograph (Turn 5).
- * Loads from Wikimedia Commons URL with loading state handling.
+ * PhotoReveal shows the "Historical Photo" clue card hint (Turn 5).
+ * The actual photo is displayed in the Silhouette component, not here.
  */
 export function PhotoReveal({
-  photoUrl,
-  shipName,
   revealed,
   className = '',
 }: PhotoRevealProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-
-  const handleLoad = () => {
-    setIsLoading(false);
-  };
-
-  const handleError = () => {
-    setIsLoading(false);
-    setHasError(true);
-  };
-
   return (
     <ClueCard
       title="Historical Photo"
@@ -43,35 +28,11 @@ export function PhotoReveal({
       className={className}
     >
       <div className="photo-reveal">
-        {hasError ? (
-          <div className="photo-reveal__error">
-            <p>Failed to load photo</p>
-            <a
-              href={photoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="photo-reveal__link"
-            >
-              View on Wikimedia Commons
-            </a>
-          </div>
-        ) : (
-          <>
-            {isLoading && (
-              <div className="photo-reveal__loading" aria-label="Loading photo">
-                <div className="photo-reveal__spinner" />
-              </div>
-            )}
-            <img
-              src={photoUrl}
-              alt={`Historical photograph of ${shipName}`}
-              className={`photo-reveal__image ${isLoading ? 'photo-reveal__image--loading' : ''}`}
-              onLoad={handleLoad}
-              onError={handleError}
-            />
-          </>
-        )}
-        <p className="photo-reveal__caption">{shipName}</p>
+        <p className="photo-reveal__hint">
+          {revealed
+            ? `See the historical photograph above`
+            : 'Photo will be revealed above'}
+        </p>
       </div>
     </ClueCard>
   );

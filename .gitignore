@@ -1,3 +1,11 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+*.local
+
 # Logs
 logs
 *.log
@@ -7,18 +15,46 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Environment variables
+.env
+.env.*
+*.env
+!.env.example
+
+# API keys and secrets
+*.pem
+*.key
+secrets/
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Claude/AI config
+.claude/
+CLAUDE.md
+
+# Internal planning documents
+.planning/
+
+# Test artifacts
+coverage/
+*.tsbuildinfo
+
+# Downloaded/generated data that shouldn't be in repo
+scripts/data-pipeline/data/images/
+scripts/data-pipeline/data/*.json
+scripts/game-generator/data/*.json
+scripts/silhouette-poc/data/
+scripts/silhouette-poc/output/
+scripts/silhouette-poc/images/

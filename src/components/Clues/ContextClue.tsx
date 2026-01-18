@@ -2,6 +2,83 @@ import type { ContextClue as ContextClueData } from '../../types/game';
 import { ClueCard } from './ClueCard';
 import './ContextClue.css';
 
+/** Map of nation names to flag emojis */
+const nationFlags: Record<string, string> = {
+  'United States': '🇺🇸',
+  'USA': '🇺🇸',
+  'United Kingdom': '🇬🇧',
+  'UK': '🇬🇧',
+  'Britain': '🇬🇧',
+  'Great Britain': '🇬🇧',
+  'Germany': '🇩🇪',
+  'Japan': '🇯🇵',
+  'France': '🇫🇷',
+  'Italy': '🇮🇹',
+  'Russia': '🇷🇺',
+  'Soviet Union': '🇷🇺',
+  'USSR': '🇷🇺',
+  'China': '🇨🇳',
+  'Spain': '🇪🇸',
+  'Portugal': '🇵🇹',
+  'Netherlands': '🇳🇱',
+  'Belgium': '🇧🇪',
+  'Sweden': '🇸🇪',
+  'Norway': '🇳🇴',
+  'Denmark': '🇩🇰',
+  'Finland': '🇫🇮',
+  'Poland': '🇵🇱',
+  'Greece': '🇬🇷',
+  'Turkey': '🇹🇷',
+  'Brazil': '🇧🇷',
+  'Argentina': '🇦🇷',
+  'Chile': '🇨🇱',
+  'Australia': '🇦🇺',
+  'Canada': '🇨🇦',
+  'India': '🇮🇳',
+  'South Korea': '🇰🇷',
+  'North Korea': '🇰🇵',
+  'Austria-Hungary': '🇦🇹',
+  'Austria': '🇦🇹',
+  'Hungary': '🇭🇺',
+  'Mexico': '🇲🇽',
+  'Thailand': '🇹🇭',
+  'Indonesia': '🇮🇩',
+  'Egypt': '🇪🇬',
+  'Israel': '🇮🇱',
+  'South Africa': '🇿🇦',
+  'New Zealand': '🇳🇿',
+  'Pakistan': '🇵🇰',
+  'Iran': '🇮🇷',
+  'Iraq': '🇮🇶',
+  'Taiwan': '🇹🇼',
+  'Singapore': '🇸🇬',
+  'Malaysia': '🇲🇾',
+  'Philippines': '🇵🇭',
+  'Vietnam': '🇻🇳',
+  'Ukraine': '🇺🇦',
+  'Romania': '🇷🇴',
+  'Bulgaria': '🇧🇬',
+  'Yugoslavia': '🇷🇸',
+  'Serbia': '🇷🇸',
+  'Croatia': '🇭🇷',
+  'Czech Republic': '🇨🇿',
+  'Czechoslovakia': '🇨🇿',
+  'Slovakia': '🇸🇰',
+  'Ireland': '🇮🇪',
+  'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+  'Peru': '🇵🇪',
+  'Colombia': '🇨🇴',
+  'Venezuela': '🇻🇪',
+  'Cuba': '🇨🇺',
+};
+
+/**
+ * Get flag emoji for a nation, returns empty string if not found
+ */
+function getFlagForNation(nation: string): string {
+  return nationFlags[nation] || '';
+}
+
 export interface ContextClueProps {
   /** Context data to display */
   data: ContextClueData;
@@ -25,6 +102,8 @@ export function ContextClue({
       ? data.conflicts.join(', ')
       : null;
 
+  const flag = getFlagForNation(data.nation);
+
   return (
     <ClueCard
       title="Historical Context"
@@ -35,7 +114,10 @@ export function ContextClue({
       <dl className="context-clue">
         <div className="context-clue__item">
           <dt className="context-clue__label">Nation</dt>
-          <dd className="context-clue__value">{data.nation}</dd>
+          <dd className="context-clue__value">
+            {flag && <span className="context-clue__flag" aria-hidden="true">{flag}</span>}
+            {data.nation}
+          </dd>
         </div>
 
         <div className="context-clue__item">
