@@ -50,7 +50,7 @@ WHERE {
   FILTER(BOUND(?length) || BOUND(?displacement))
 
   # Filter for ships commissioned after 1950
-  FILTER(YEAR(?commissioned) > 1950)
+  FILTER(YEAR(?commissioned) > 1980)
 
   # Must have English label (not Q-number)
   ?ship rdfs:label ?label .
@@ -100,7 +100,7 @@ WHERE {
   FILTER(BOUND(?length) || BOUND(?displacement))
 
   # Filter for ships commissioned after 1950
-  FILTER(YEAR(?commissioned) > 1950)
+  FILTER(YEAR(?commissioned) > 1980)
 
   # Must have English label
   ?ship rdfs:label ?label .

@@ -71,8 +71,8 @@ WHERE {
   ?ship wdt:P729 ?commissioned .          # Has commissioned date
   ?ship wdt:P289 ?class .                 # Has vessel class
 
-  # Filter for ships commissioned after 1950
-  FILTER(YEAR(?commissioned) > 1950)
+  # Filter for ships commissioned after 1980
+  FILTER(YEAR(?commissioned) > 1980)
 
   # Must have English class label (not Q-number)
   ?class rdfs:label ?classLabel .
