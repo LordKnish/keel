@@ -3,17 +3,17 @@ import { useShipSearch, type ShipListEntry } from '../../hooks/useShipSearch';
 import './ShipSearch.css';
 
 export interface ShipSearchProps {
-  /** Callback when a ship is selected */
+  /** Callback when a class is selected */
   onSelect: (ship: ShipListEntry) => void;
   /** Whether the search is disabled */
   disabled?: boolean;
-  /** Previously guessed ship IDs to exclude from suggestions */
+  /** Previously guessed class IDs to exclude from suggestions */
   excludeIds?: string[];
 }
 
 /**
- * Ship search autocomplete component.
- * Provides accessible fuzzy search for ship names.
+ * Ship class search autocomplete component.
+ * Provides accessible fuzzy search for ship class names.
  */
 export function ShipSearch({ onSelect, disabled = false, excludeIds = [] }: ShipSearchProps) {
   const { search, isLoading, error } = useShipSearch();
@@ -118,7 +118,7 @@ export function ShipSearch({ onSelect, disabled = false, excludeIds = [] }: Ship
     return (
       <div className="ship-search ship-search--error">
         <p className="ship-search__error-message">
-          Failed to load ships. Please refresh the page.
+          Failed to load ship classes. Please refresh the page.
         </p>
       </div>
     );
@@ -147,12 +147,12 @@ export function ShipSearch({ onSelect, disabled = false, excludeIds = [] }: Ship
           ref={inputRef}
           type="text"
           className="ship-search__input"
-          placeholder={isLoading ? 'Loading ships...' : 'Type a ship name...'}
+          placeholder={isLoading ? 'Loading classes...' : 'Type a ship class...'}
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           disabled={disabled || isLoading}
-          aria-label="Search for a ship"
+          aria-label="Search for a ship class"
           aria-expanded={open}
           aria-autocomplete="list"
           aria-controls={open ? 'ship-search-list' : undefined}
