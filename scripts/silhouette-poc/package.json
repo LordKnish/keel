@@ -8,13 +8,19 @@
     "generate": "ts-node --esm src/test-runner.ts",
     "single": "ts-node --esm src/single.ts"
   },
-  "keywords": ["silhouette", "image-processing", "ship"],
+  "keywords": [
+    "silhouette",
+    "image-processing",
+    "ship"
+  ],
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
     "@imgly/background-removal-node": "^1.4.5",
+    "@techstark/opencv-js": "^4.12.0-release.1",
     "@types/node": "^25.0.9",
+    "dotenv": "^17.2.3",
     "sharp": "^0.34.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
