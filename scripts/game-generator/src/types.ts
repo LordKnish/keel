@@ -52,6 +52,8 @@ export interface ShipIdentity {
   id: string;
   /** Primary display name (e.g., "USS Enterprise") */
   name: string;
+  /** Ship class name for matching (e.g., "Fletcher-class destroyer") */
+  className: string | null;
   /** Alternative names/designations for fuzzy matching */
   aliases: string[];
 }
@@ -103,6 +105,7 @@ export interface ShipListEntry {
 
 /**
  * Ship list for autocomplete (public/ship-list.json).
+ * @deprecated Use ClassListData instead - game now uses class-based guessing
  */
 export interface ShipListData {
   /** Generated timestamp */
@@ -111,6 +114,28 @@ export interface ShipListData {
   count: number;
   /** All searchable ships */
   ships: ShipListEntry[];
+}
+
+/**
+ * Class entry for autocomplete list.
+ */
+export interface ClassListEntry {
+  /** Synthetic ID based on normalized class name */
+  id: string;
+  /** Display name (e.g., "Fletcher-class destroyer") */
+  name: string;
+}
+
+/**
+ * Class list for autocomplete (public/ship-list.json).
+ */
+export interface ClassListData {
+  /** Generated timestamp */
+  generatedAt: string;
+  /** Total class count */
+  count: number;
+  /** All searchable classes */
+  classes: ClassListEntry[];
 }
 
 /**
