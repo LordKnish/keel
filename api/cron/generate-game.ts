@@ -646,53 +646,47 @@ async function generateLineArtFromUrl(imageUrl: string): Promise<string> {
   // 3. Remove background (if API key available)
   const noBgBuffer = await removeBackgroundWithAPI(preprocessed);
 
-  // 4. Generate pencil sketch effect
-  console.log('  Generating pencil sketch...');
+  // 4. Generate line art (sharpened edges)
+  console.log('  Generating line art...');
 
-  // Step 1: Grayscale
-  const grayscale = await sharp(noBgBuffer)
+  // Get original alpha channel
+  const { data: origData, info } = await sharp(noBgBuffer)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  // Sharpen first for more detail
+  const sharpened = await sharp(noBgBuffer).sharpen({ sigma: 2 }).toBuffer();
+
+  // Edge detection with Photon laplace
+  const image = photon.PhotonImage.new_from_byteslice(new Uint8Array(sharpened));
+  photon.laplace(image);
+  const edges = Buffer.from(image.get_bytes());
+
+  const { data: edgeData } = await sharp(edges)
     .grayscale()
     .raw()
     .toBuffer({ resolveWithObject: true });
 
-  const { data: grayData, info } = grayscale;
+  // Create transparent PNG - black lines where edges detected
+  const rgba = Buffer.alloc(info.width * info.height * 4);
+  for (let i = 0; i < info.width * info.height; i++) {
+    const origAlpha = origData[i * 4 + 3]!;
+    const edgeVal = edgeData[i]!;
+    const idx = i * 4;
 
-  // Step 2: Invert the grayscale
-  const inverted = Buffer.alloc(grayData.length);
-  for (let i = 0; i < grayData.length; i++) {
-    inverted[i] = 255 - grayData[i]!;
-  }
-
-  // Step 3: Gaussian blur the inverted image
-  const blurred = await sharp(inverted, {
-    raw: { width: info.width, height: info.height, channels: 1 },
-  })
-    .blur(21) // Larger blur = softer sketch
-    .raw()
-    .toBuffer();
-
-  // Step 4: Color dodge blend: result = base / (1 - blend/255) clamped to 255
-  const sketch = Buffer.alloc(grayData.length);
-  for (let i = 0; i < grayData.length; i++) {
-    const base = grayData[i]!;
-    const blend = blurred[i]!;
-
-    if (blend === 255) {
-      sketch[i] = 255;
-    } else {
-      // Color dodge formula
-      const result = Math.min(255, Math.floor((base * 256) / (256 - blend)));
-      sketch[i] = result;
+    if (origAlpha > 128 && edgeVal < 180) {
+      // Edge detected - black line with varying opacity
+      rgba[idx] = 0;       // R
+      rgba[idx + 1] = 0;   // G
+      rgba[idx + 2] = 0;   // B
+      rgba[idx + 3] = Math.min(255, (180 - edgeVal) * 2); // A
     }
   }
 
-  // Step 5: Increase contrast for bolder lines
-  const lineArt = await sharp(sketch, {
-    raw: { width: info.width, height: info.height, channels: 1 },
-  })
-    .linear(1.5, -50) // Boost contrast
-    .png()
-    .toBuffer();
+  const lineArt = await sharp(rgba, {
+    raw: { width: info.width, height: info.height, channels: 4 },
+  }).png().toBuffer();
 
   const timeMs = Date.now() - start;
   const { width, height } = await sharp(lineArt).metadata();
