@@ -62,7 +62,7 @@ export const GAME_MODES: Record<GameModeId, ModeConfig> = {
   },
   coastguard: {
     id: 'coastguard',
-    name: 'Coast Guard',
+    name: 'Small Ships',
     description: 'Patrol vessels and cutters',
     yearMin: null,
     yearMax: null,

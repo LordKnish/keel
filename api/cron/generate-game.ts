@@ -158,7 +158,7 @@ const GAME_MODES: Record<GameModeId, ModeConfig> = {
   },
   coastguard: {
     id: 'coastguard',
-    name: 'Coast Guard',
+    name: 'Small Ships',
     yearMin: null,
     yearMax: null,
     shipTypes: ['Q331795', 'Q11479409', 'Q10316200', 'Q683363'],

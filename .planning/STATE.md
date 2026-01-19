@@ -1,16 +1,17 @@
 # Project State
 
 ## Current Milestone
-**v2.1: Bug Fixes and Polish** - In Progress
+**v2.1: Bug Fixes and Polish** - Complete
 
 ## Current Phase
-Phase 9: Search and trivia data fixes
+None (milestone complete)
 
 ## Status
-- Phase 9: **Pending** - Search and trivia data fixes
-- Phase 10: **Pending** - Game state persistence
+- Phase 9: **Complete** - Search and trivia data fixes (3 commits)
+- Phase 10: **Complete** - Game state persistence (2 commits)
 
 ## Previous Milestones
+- **v2.1: Bug Fixes and Polish** - Complete
 - **v2.0: Bonus Game Modes** - Complete
 - **v1.0: Switch from ship name to ship class** - Complete
 

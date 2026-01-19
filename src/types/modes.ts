@@ -67,7 +67,7 @@ export const GAME_MODES: Record<GameModeId, GameModeConfig> = {
   },
   coastguard: {
     id: 'coastguard',
-    name: 'Coast Guard',
+    name: 'Small Ships',
     description: 'Small vessels',
     icon: '🚤',
     dataFile: '/game-data-coastguard.json',
