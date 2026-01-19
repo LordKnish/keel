@@ -25,7 +25,7 @@ function App() {
   const modeConfig = GAME_MODES[currentMode];
 
   // Mode completion tracking
-  const { isComplete: isModeComplete, markComplete, allCompletions, isUnlocked } = useModeCompletion(currentMode);
+  const { isComplete: isModeComplete, result: savedResult, markComplete, allCompletions, isUnlocked } = useModeCompletion(currentMode);
 
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -129,16 +129,39 @@ function App() {
 
   // Save completion to localStorage when game ends
   useEffect(() => {
-    if (isGameComplete && !completionSavedRef.current && !isModeComplete) {
+    if (isGameComplete && !completionSavedRef.current && !isModeComplete && gameData) {
       completionSavedRef.current = true;
       markComplete({
         isWin,
         guessCount: guessResults.length,
         timeTaken,
         guessResults,
+        shipId: gameData.ship.id,
       });
     }
-  }, [isGameComplete, isWin, guessResults, timeTaken, markComplete, isModeComplete]);
+  }, [isGameComplete, isWin, guessResults, timeTaken, markComplete, isModeComplete, gameData]);
+
+  // Restore completed state from localStorage if same ship was already played
+  useEffect(() => {
+    if (gameData && isModeComplete && savedResult && savedResult.shipId === gameData.ship.id) {
+      // Same ship - restore completion state
+      setIsGameComplete(true);
+      setIsWin(savedResult.isWin);
+      setGuessResults(savedResult.guessResults);
+      setTimeTaken(savedResult.timeTaken);
+      completionSavedRef.current = true; // Don't re-save
+
+      // Reconstruct guess history for display
+      const reconstructedGuesses: GuessEntry[] = savedResult.guessResults.map((r, i) => ({
+        shipName: r === 'correct'
+          ? (gameData.ship.className || gameData.ship.name)
+          : `Guess ${i + 1}`,
+        correct: r === 'correct',
+      }));
+      setGuesses(reconstructedGuesses);
+    }
+    // If shipId doesn't match (new game generated), state stays fresh
+  }, [gameData, isModeComplete, savedResult]);
 
   // Sequential reveal effect on win
   useEffect(() => {
