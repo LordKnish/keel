@@ -94,6 +94,7 @@ export interface ModeResult {
   guessCount: number;
   timeTaken: number;
   guessResults: ('correct' | 'wrong')[];
+  shipId: string; // Track which ship this completion is for
 }
 
 /**
