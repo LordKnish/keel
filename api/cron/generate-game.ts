@@ -177,12 +177,6 @@ const SHIP_TYPES = GAME_MODES.main.shipTypes;
 
 async function getUsedShipIds(mode: GameModeId = 'main'): Promise<string[]> {
   try {
-    // For main mode, use the legacy table without mode column
-    if (mode === 'main') {
-      const result = await sql`SELECT wikidata_id FROM used_ships`;
-      return result.rows.map((row) => row.wikidata_id);
-    }
-    // For bonus modes, filter by mode (table may need mode column added)
     const result = await sql`SELECT wikidata_id FROM used_ships WHERE mode = ${mode}`;
     return result.rows.map((row) => row.wikidata_id);
   } catch (error) {
@@ -193,21 +187,11 @@ async function getUsedShipIds(mode: GameModeId = 'main'): Promise<string[]> {
 
 async function markShipUsed(id: string, name: string, mode: GameModeId = 'main'): Promise<void> {
   try {
-    // For main mode, use legacy behavior
-    if (mode === 'main') {
-      await sql`
-        INSERT INTO used_ships (wikidata_id, name, used_date)
-        VALUES (${id}, ${name}, CURRENT_DATE)
-        ON CONFLICT (wikidata_id) DO NOTHING
-      `;
-    } else {
-      // For bonus modes, include mode (may need schema update)
-      await sql`
-        INSERT INTO used_ships (wikidata_id, name, used_date, mode)
-        VALUES (${id}, ${name}, CURRENT_DATE, ${mode})
-        ON CONFLICT (wikidata_id, mode) DO NOTHING
-      `;
-    }
+    await sql`
+      INSERT INTO used_ships (wikidata_id, name, used_date, mode)
+      VALUES (${id}, ${name}, CURRENT_DATE, ${mode})
+      ON CONFLICT (wikidata_id, mode) DO NOTHING
+    `;
     console.log(`Marked ${name} (${id}) as used in ${mode}`);
   } catch (error) {
     console.error('Failed to mark ship as used:', error);
