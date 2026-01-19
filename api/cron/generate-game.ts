@@ -5,7 +5,7 @@
  *
  * Query parameters:
  *   mode: 'main' | 'ww2' | 'coldwar' | 'carrier' | 'submarine' | 'coastguard'
- *   all: If 'true', generates all bonus modes (excludes main)
+ *   all: 'true' = bonus modes only, 'everything' = all modes including main
  *   manual: If 'true', allows manual trigger with secret
  *   secret: CRON_SECRET for manual triggers
  *
@@ -945,8 +945,10 @@ export default async function handler(
     console.log('='.repeat(60));
     console.log(`Keel Game Generator (${isManualTrigger ? 'Manual Trigger' : 'Vercel Cron'})`);
     console.log(`Date: ${gameDate}`);
-    if (generateAll) {
-      console.log('Mode: ALL BONUS MODES');
+    if (request.query.all === 'everything') {
+      console.log('Mode: ALL MODES (including main)');
+    } else if (generateAll) {
+      console.log('Mode: ALL BONUS MODES (excluding main)');
     } else if (requestedMode) {
       console.log(`Mode: ${requestedMode}`);
     } else {
@@ -957,7 +959,10 @@ export default async function handler(
     // Determine which modes to generate
     let modesToGenerate: GameModeId[];
 
-    if (generateAll) {
+    if (request.query.all === 'everything') {
+      // Generate ALL modes including main
+      modesToGenerate = ALL_MODE_IDS;
+    } else if (generateAll) {
       // Generate all bonus modes (excludes main)
       modesToGenerate = BONUS_MODE_IDS;
     } else if (requestedMode && ALL_MODE_IDS.includes(requestedMode as GameModeId)) {
