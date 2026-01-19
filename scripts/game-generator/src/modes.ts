@@ -56,15 +56,19 @@ export const GAME_MODES: Record<GameModeId, ModeConfig> = {
     description: 'Submarines only',
     yearMin: null,
     yearMax: null,
-    shipTypes: ['Q2811', 'Q473932'],
+    // Q4818021=attack submarine, Q2811=submarine, Q683570=ballistic missile submarine,
+    // Q17005311=coastal submarine, Q757587=nuclear attack sub, Q757554=nuclear submarine
+    shipTypes: ['Q4818021', 'Q2811', 'Q683570', 'Q17005311', 'Q757587', 'Q757554'],
   },
   coastguard: {
     id: 'coastguard',
     name: 'Coast Guard',
-    description: 'Small vessels and patrol boats',
+    description: 'Patrol vessels and cutters',
     yearMin: null,
     yearMax: null,
-    shipTypes: ['Q1797385', 'Q847109', 'Q3041792'],
+    // Q331795=patrol vessel, Q11479409=offshore patrol vessel,
+    // Q10316200=small patrol boat, Q683363=cutter
+    shipTypes: ['Q331795', 'Q11479409', 'Q10316200', 'Q683363'],
   },
 };
 
