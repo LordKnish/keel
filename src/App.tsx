@@ -297,6 +297,7 @@ function App() {
         totalTurns={totalTurns}
         guessResults={guessResults}
         timeTaken={timeTaken}
+        modeName={currentMode === 'main' ? 'Daily' : modeConfig.name}
         onClose={() => setShowWinModal(false)}
       />
       <HelpModal

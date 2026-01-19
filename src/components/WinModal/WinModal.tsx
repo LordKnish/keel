@@ -17,6 +17,8 @@ export interface WinModalProps {
   guessResults: GuessResult[];
   /** Time taken to solve (in seconds) */
   timeTaken: number;
+  /** Mode name for share text (e.g., "Daily", "WW2", "Cold War") */
+  modeName: string;
   /** Callback when modal is closed */
   onClose: () => void;
 }
@@ -33,6 +35,7 @@ export function WinModal({
   totalTurns,
   guessResults,
   timeTaken,
+  modeName,
   onClose,
 }: WinModalProps) {
   const [copied, setCopied] = useState(false);
@@ -59,8 +62,8 @@ export function WinModal({
 
     const timeStr = formatTime(timeTaken);
 
-    return `⚓ Keel ${today}\n🚢 ${guessCount}/${totalTurns} • ⏱️ ${timeStr}\n${resultEmojis}\n\nPlay at: ${window.location.origin}`;
-  }, [guessResults, guessCount, totalTurns, timeTaken]);
+    return `⚓ Keel ${modeName} ${today}\n🚢 ${guessCount}/${totalTurns} • ⏱️ ${timeStr}\n${resultEmojis}\n\nPlay at: ${window.location.origin}`;
+  }, [guessResults, guessCount, totalTurns, timeTaken, modeName]);
 
   const handleCopy = useCallback(async () => {
     const shareText = generateShareText();
