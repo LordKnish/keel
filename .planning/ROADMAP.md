@@ -108,9 +108,6 @@
   - Added API support for curling any mode
   - 58 tests passing
 
-**Known Issues for Future Work:**
-- Ship type SPARQL filters need refinement for submarine/coastguard modes
-
 ---
 
 ## v2.0 Complete

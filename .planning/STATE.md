@@ -32,12 +32,6 @@ None (milestone complete)
 - Submarine: 71 ships
 - Coast Guard: 33 ships
 
-## Known Issues
-- Ship type filtering for submarine and coastguard modes needs investigation
-  - Submarine mode selected a RoRo cargo ship instead of actual submarine
-  - Coastguard mode selected a battleship instead of patrol boat
-  - SPARQL query filters may need refinement
-
 ## Notes
 - Ship pool expanded to 61 ships (added guided missile destroyers)
 - Multi-mode architecture complete with generator CLI flags (--all, --mode=xxx)
