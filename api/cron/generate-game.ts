@@ -1,13 +1,15 @@
 /**
- * Vercel Serverless Function for daily game generation.
- * Triggered by Vercel Cron at 12:00 AM UTC daily.
+ * Vercel Serverless Function for game generation.
+ * Triggered by Vercel Cron at 12:00 AM UTC daily (main mode).
+ * Can also be triggered manually for any mode.
  *
- * This function:
- * 1. Selects a random ship from Wikidata (not previously used)
- * 2. Fetches clue data (specs, context, trivia, photo)
- * 3. Generates line art silhouette
- * 4. Stores game data in Neon PostgreSQL
- * 5. Tracks used ships in Neon PostgreSQL
+ * Query parameters:
+ *   mode: 'main' | 'ww2' | 'coldwar' | 'carrier' | 'submarine' | 'coastguard'
+ *   all: If 'true', generates all bonus modes (excludes main)
+ *   manual: If 'true', allows manual trigger with secret
+ *   secret: CRON_SECRET for manual triggers
+ *
+ * All modes store in Neon PostgreSQL.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
@@ -104,55 +106,127 @@ const SPARQL_ENDPOINT = 'https://query.wikidata.org/sparql';
 const USER_AGENT = 'Mozilla/5.0 (compatible; KeelGame/1.0; +https://github.com/keel-game)';
 const CRON_SECRET = process.env.CRON_SECRET;
 
-const SHIP_TYPES = [
-  'Q174736',   // destroyer
-  'Q182531',   // battleship
-  'Q17205',    // aircraft carrier
-  'Q104843',   // cruiser
-  'Q161705',   // frigate
-  'Q170013',   // corvette
-  'Q2811',     // submarine
-];
+// ============================================================================
+// Game Mode Configuration
+// ============================================================================
+
+type GameModeId = 'main' | 'ww2' | 'coldwar' | 'carrier' | 'submarine' | 'coastguard';
+
+interface ModeConfig {
+  id: GameModeId;
+  name: string;
+  yearMin: number | null;
+  yearMax: number | null;
+  shipTypes: string[];
+}
+
+const GAME_MODES: Record<GameModeId, ModeConfig> = {
+  main: {
+    id: 'main',
+    name: 'Daily Keel',
+    yearMin: 1980,
+    yearMax: null,
+    shipTypes: ['Q174736', 'Q182531', 'Q17205', 'Q104843', 'Q161705', 'Q170013', 'Q2811', 'Q2607934'],
+  },
+  ww2: {
+    id: 'ww2',
+    name: 'WW2',
+    yearMin: 1939,
+    yearMax: 1945,
+    shipTypes: ['Q174736', 'Q182531', 'Q17205', 'Q104843', 'Q161705', 'Q170013', 'Q2811'],
+  },
+  coldwar: {
+    id: 'coldwar',
+    name: 'Cold War',
+    yearMin: 1947,
+    yearMax: 1991,
+    shipTypes: ['Q174736', 'Q182531', 'Q17205', 'Q104843', 'Q161705', 'Q170013', 'Q2811'],
+  },
+  carrier: {
+    id: 'carrier',
+    name: 'Aircraft Carrier',
+    yearMin: null,
+    yearMax: null,
+    shipTypes: ['Q17205'],
+  },
+  submarine: {
+    id: 'submarine',
+    name: 'Submarine',
+    yearMin: null,
+    yearMax: null,
+    shipTypes: ['Q4818021', 'Q2811', 'Q683570', 'Q17005311', 'Q757587', 'Q757554'],
+  },
+  coastguard: {
+    id: 'coastguard',
+    name: 'Coast Guard',
+    yearMin: null,
+    yearMax: null,
+    shipTypes: ['Q331795', 'Q11479409', 'Q10316200', 'Q683363'],
+  },
+};
+
+const ALL_MODE_IDS: GameModeId[] = ['main', 'ww2', 'coldwar', 'carrier', 'submarine', 'coastguard'];
+const BONUS_MODE_IDS: GameModeId[] = ['ww2', 'coldwar', 'carrier', 'submarine', 'coastguard'];
+
+// Legacy constant for backward compatibility
+const SHIP_TYPES = GAME_MODES.main.shipTypes;
 
 // ============================================================================
 // Database Functions (Neon PostgreSQL)
 // ============================================================================
 
-async function getUsedShipIds(): Promise<string[]> {
+async function getUsedShipIds(mode: GameModeId = 'main'): Promise<string[]> {
   try {
-    const result = await sql`SELECT wikidata_id FROM used_ships`;
+    // For main mode, use the legacy table without mode column
+    if (mode === 'main') {
+      const result = await sql`SELECT wikidata_id FROM used_ships`;
+      return result.rows.map((row) => row.wikidata_id);
+    }
+    // For bonus modes, filter by mode (table may need mode column added)
+    const result = await sql`SELECT wikidata_id FROM used_ships WHERE mode = ${mode}`;
     return result.rows.map((row) => row.wikidata_id);
   } catch (error) {
-    console.error('Failed to fetch used ships:', error);
+    console.error(`Failed to fetch used ships for ${mode}:`, error);
     return [];
   }
 }
 
-async function markShipUsed(id: string, name: string): Promise<void> {
+async function markShipUsed(id: string, name: string, mode: GameModeId = 'main'): Promise<void> {
   try {
-    await sql`
-      INSERT INTO used_ships (wikidata_id, name, used_date)
-      VALUES (${id}, ${name}, CURRENT_DATE)
-      ON CONFLICT (wikidata_id) DO NOTHING
-    `;
-    console.log(`Marked ${name} (${id}) as used`);
+    // For main mode, use legacy behavior
+    if (mode === 'main') {
+      await sql`
+        INSERT INTO used_ships (wikidata_id, name, used_date)
+        VALUES (${id}, ${name}, CURRENT_DATE)
+        ON CONFLICT (wikidata_id) DO NOTHING
+      `;
+    } else {
+      // For bonus modes, include mode (may need schema update)
+      await sql`
+        INSERT INTO used_ships (wikidata_id, name, used_date, mode)
+        VALUES (${id}, ${name}, CURRENT_DATE, ${mode})
+        ON CONFLICT (wikidata_id, mode) DO NOTHING
+      `;
+    }
+    console.log(`Marked ${name} (${id}) as used in ${mode}`);
   } catch (error) {
     console.error('Failed to mark ship as used:', error);
     throw error;
   }
 }
 
-async function saveGameData(gameData: GameData): Promise<void> {
+async function saveGameData(gameData: GameData, mode: GameModeId = 'main'): Promise<void> {
   const { date, ship, silhouette, clues } = gameData;
-  
+
   // Convert arrays to PostgreSQL array format
   const aliasesArray = `{${ship.aliases.map(a => `"${a.replace(/"/g, '\\"')}"`).join(',')}}`;
   const conflictsArray = `{${clues.context.conflicts.map(c => `"${c.replace(/"/g, '\\"')}"`).join(',')}}`;
-  
+
   try {
     await sql`
       INSERT INTO game_data (
         game_date,
+        mode,
         ship_id,
         ship_name,
         ship_aliases,
@@ -168,6 +242,7 @@ async function saveGameData(gameData: GameData): Promise<void> {
         clues_photo
       ) VALUES (
         ${date}::date,
+        ${mode},
         ${ship.id},
         ${ship.name},
         ${aliasesArray}::text[],
@@ -182,7 +257,7 @@ async function saveGameData(gameData: GameData): Promise<void> {
         ${clues.trivia},
         ${clues.photo}
       )
-      ON CONFLICT (game_date) DO UPDATE SET
+      ON CONFLICT (game_date, mode) DO UPDATE SET
         ship_id = EXCLUDED.ship_id,
         ship_name = EXCLUDED.ship_name,
         ship_aliases = EXCLUDED.ship_aliases,
@@ -198,9 +273,9 @@ async function saveGameData(gameData: GameData): Promise<void> {
         clues_photo = EXCLUDED.clues_photo,
         updated_at = CURRENT_TIMESTAMP
     `;
-    console.log(`Saved game data for ${date}`);
+    console.log(`Saved game data for ${mode} on ${date}`);
   } catch (error) {
-    console.error('Failed to save game data:', error);
+    console.error(`Failed to save game data for ${mode}:`, error);
     throw error;
   }
 }
@@ -209,13 +284,27 @@ async function saveGameData(gameData: GameData): Promise<void> {
 // SPARQL Functions
 // ============================================================================
 
-function buildCountQuery(excludeIds: string[]): string {
+function buildYearFilter(mode: ModeConfig): string {
+  if (mode.yearMin !== null && mode.yearMax !== null) {
+    return `FILTER(YEAR(?commissioned) >= ${mode.yearMin} && YEAR(?commissioned) <= ${mode.yearMax})`;
+  }
+  if (mode.yearMin !== null) {
+    return `FILTER(YEAR(?commissioned) >= ${mode.yearMin})`;
+  }
+  if (mode.yearMax !== null) {
+    return `FILTER(YEAR(?commissioned) <= ${mode.yearMax})`;
+  }
+  return ''; // No year filter
+}
+
+function buildCountQuery(excludeIds: string[], mode: ModeConfig): string {
   const excludeFilter =
     excludeIds.length > 0
       ? `FILTER(?ship NOT IN (${excludeIds.map((id) => `wd:${id}`).join(', ')}))`
       : '';
 
-  const typeValues = SHIP_TYPES.map((t) => `wd:${t}`).join(' ');
+  const typeValues = mode.shipTypes.map((t) => `wd:${t}`).join(' ');
+  const yearFilter = buildYearFilter(mode);
 
   return `
 SELECT (COUNT(DISTINCT ?ship) AS ?count)
@@ -224,12 +313,13 @@ WHERE {
   ?ship wdt:P31 ?type .
   ?ship wdt:P18 ?image .
   ?ship wdt:P729 ?commissioned .
+  ?ship wdt:P289 ?class .
 
   OPTIONAL { ?ship wdt:P2043 ?length . }
   OPTIONAL { ?ship wdt:P2386 ?displacement . }
   FILTER(BOUND(?length) || BOUND(?displacement))
 
-  FILTER(YEAR(?commissioned) > 1950)
+  ${yearFilter}
 
   ?ship rdfs:label ?label .
   FILTER(LANG(?label) = "en")
@@ -240,13 +330,14 @@ WHERE {
   `.trim();
 }
 
-function buildShipQuery(excludeIds: string[], offset: number): string {
+function buildShipQuery(excludeIds: string[], offset: number, mode: ModeConfig): string {
   const excludeFilter =
     excludeIds.length > 0
       ? `FILTER(?ship NOT IN (${excludeIds.map((id) => `wd:${id}`).join(', ')}))`
       : '';
 
-  const typeValues = SHIP_TYPES.map((t) => `wd:${t}`).join(' ');
+  const typeValues = mode.shipTypes.map((t) => `wd:${t}`).join(' ');
+  const yearFilter = buildYearFilter(mode);
 
   return `
 SELECT DISTINCT
@@ -267,12 +358,13 @@ WHERE {
   ?ship wdt:P31 ?type .
   ?ship wdt:P18 ?image .
   ?ship wdt:P729 ?commissioned .
+  ?ship wdt:P289 ?class .
 
   OPTIONAL { ?ship wdt:P2043 ?length . }
   OPTIONAL { ?ship wdt:P2386 ?displacement . }
   FILTER(BOUND(?length) || BOUND(?displacement))
 
-  FILTER(YEAR(?commissioned) > 1950)
+  ${yearFilter}
 
   ?ship rdfs:label ?label .
   FILTER(LANG(?label) = "en")
@@ -280,7 +372,6 @@ WHERE {
 
   ${excludeFilter}
 
-  OPTIONAL { ?ship wdt:P289 ?class . }
   OPTIONAL { ?ship wdt:P17 ?country . }
   OPTIONAL {
     ?ship wdt:P137 ?operator .
@@ -329,8 +420,8 @@ async function executeSparql<T>(query: string): Promise<T[]> {
   return data.results.bindings;
 }
 
-async function getEligibleShipCount(excludeIds: string[]): Promise<number> {
-  const query = buildCountQuery(excludeIds);
+async function getEligibleShipCount(excludeIds: string[], mode: ModeConfig): Promise<number> {
+  const query = buildCountQuery(excludeIds, mode);
   const results = await executeSparql<{ count: { value: string } }>(query);
 
   if (results.length === 0) {
@@ -444,10 +535,10 @@ function parseShipResult(results: WikidataShipResult[]): SelectedShip {
   };
 }
 
-async function selectRandomShip(excludeIds: string[]): Promise<SelectedShip | null> {
-  console.log(`Counting eligible ships (excluding ${excludeIds.length})...`);
+async function selectRandomShip(excludeIds: string[], mode: ModeConfig): Promise<SelectedShip | null> {
+  console.log(`Counting eligible ships for ${mode.name} (excluding ${excludeIds.length})...`);
 
-  const count = await getEligibleShipCount(excludeIds);
+  const count = await getEligibleShipCount(excludeIds, mode);
   console.log(`Found ${count} eligible ships`);
 
   if (count === 0) {
@@ -457,14 +548,14 @@ async function selectRandomShip(excludeIds: string[]): Promise<SelectedShip | nu
   const offset = Math.floor(Math.random() * count);
   console.log(`Selecting ship at offset ${offset}...`);
 
-  const query = buildShipQuery(excludeIds, offset);
+  const query = buildShipQuery(excludeIds, offset, mode);
   const results = await executeSparql<WikidataShipResult>(query);
 
   if (results.length === 0) {
     console.warn('No ship found at offset, retrying...');
     const newOffset = Math.floor(Math.random() * count);
     const retryResults = await executeSparql<WikidataShipResult>(
-      buildShipQuery(excludeIds, newOffset)
+      buildShipQuery(excludeIds, newOffset, mode)
     );
     if (retryResults.length === 0) {
       return null;
@@ -696,6 +787,132 @@ async function generateLineArtFromUrl(imageUrl: string): Promise<string> {
 }
 
 // ============================================================================
+// Single Mode Generation
+// ============================================================================
+
+interface GenerationResult {
+  success: boolean;
+  mode: GameModeId;
+  ship?: { id: string; name: string; class: string | null };
+  date?: string;
+  error?: string;
+  silhouetteSizeKB?: number;
+}
+
+async function generateForMode(
+  mode: ModeConfig,
+  gameDate: string,
+  requireTrivia: boolean = true
+): Promise<GenerationResult> {
+  const MAX_RETRIES = 10;
+
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`Generating: ${mode.name}`);
+  console.log(`${'='.repeat(60)}`);
+
+  // 1. Load used ships for this mode
+  const usedIds = await getUsedShipIds(mode.id);
+  console.log(`Used ships in ${mode.id}: ${usedIds.length}`);
+
+  // 2. Select random ship (with trivia if required)
+  const excludeIds = [...usedIds];
+  let ship: SelectedShip | null = null;
+  let clues: GameClues | null = null;
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    console.log(`\nSelecting random ship (attempt ${attempt}/${MAX_RETRIES})...`);
+    ship = await selectRandomShip(excludeIds, mode);
+
+    if (!ship) {
+      return {
+        success: false,
+        mode: mode.id,
+        error: 'No eligible ships found',
+      };
+    }
+
+    console.log(`\nSelected: ${ship.name} (${ship.id})`);
+    console.log(`  Country: ${ship.country || 'Unknown'}`);
+    console.log(`  Class: ${ship.className || 'Unknown'}`);
+    console.log(`  Commissioned: ${ship.commissioned || 'Unknown'}`);
+
+    // 3. Fetch clues
+    console.log('\nFetching clue data...');
+    clues = await fetchClues(ship);
+
+    if (!requireTrivia || clues.trivia) {
+      if (clues.trivia) {
+        console.log('  Trivia found, proceeding with this ship.');
+      }
+      break;
+    }
+
+    console.log('  No trivia found, trying another ship...');
+    excludeIds.push(ship.id);
+    ship = null;
+    clues = null;
+  }
+
+  if (!ship || !clues) {
+    return {
+      success: false,
+      mode: mode.id,
+      error: requireTrivia
+        ? `No ship with trivia found after ${MAX_RETRIES} attempts`
+        : 'No eligible ships found',
+    };
+  }
+
+  // 4. Generate line art
+  console.log('\nGenerating line art...');
+  let silhouette: string;
+  try {
+    silhouette = await generateLineArtFromUrl(ship.imageUrl);
+  } catch (error) {
+    return {
+      success: false,
+      mode: mode.id,
+      error: `Failed to generate line art: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+
+  // 5. Build game data
+  const shipIdentity: ShipIdentity = {
+    id: ship.id,
+    name: ship.name,
+    aliases: [],
+  };
+
+  if (ship.className) {
+    shipIdentity.aliases.push(ship.className);
+  }
+
+  const gameData: GameData = {
+    date: gameDate,
+    ship: shipIdentity,
+    silhouette: `data:image/png;base64,${silhouette}`,
+    clues,
+  };
+
+  // 6. Save to database
+  console.log('\nSaving game data to database...');
+  await saveGameData(gameData, mode.id);
+
+  // 7. Mark ship as used
+  await markShipUsed(ship.id, ship.name, mode.id);
+
+  console.log(`\n${mode.name} generation complete!`);
+
+  return {
+    success: true,
+    mode: mode.id,
+    ship: { id: ship.id, name: ship.name, class: ship.className },
+    date: gameDate,
+    silhouetteSizeKB: Math.round(silhouette.length / 1024),
+  };
+}
+
+// ============================================================================
 // Main Handler
 // ============================================================================
 
@@ -706,142 +923,90 @@ export default async function handler(
   // Check for manual trigger via query param
   const isManualTrigger = request.query.manual === 'true';
   const forceDate = typeof request.query.date === 'string' ? request.query.date : null;
+  const generateAll = request.query.all === 'true';
+  const requestedMode = typeof request.query.mode === 'string' ? request.query.mode : null;
 
   // Verify authorization
-  // - Cron jobs use Bearer token in Authorization header
-  // - Manual triggers can use ?secret=XXX query param
   const authHeader = request.headers.authorization;
   const querySecret = request.query.secret;
 
   const isAuthorized =
-    !CRON_SECRET || // No secret configured = allow all
-    authHeader === `Bearer ${CRON_SECRET}` || // Cron job auth
-    querySecret === CRON_SECRET; // Manual trigger auth
+    !CRON_SECRET ||
+    authHeader === `Bearer ${CRON_SECRET}` ||
+    querySecret === CRON_SECRET;
 
   if (!isAuthorized) {
     return response.status(401).json({ error: 'Unauthorized' });
   }
 
+  const gameDate = forceDate || new Date().toISOString().split('T')[0];
+
   try {
     console.log('='.repeat(60));
     console.log(`Keel Game Generator (${isManualTrigger ? 'Manual Trigger' : 'Vercel Cron'})`);
-    if (forceDate) {
-      console.log(`Forcing date: ${forceDate}`);
+    console.log(`Date: ${gameDate}`);
+    if (generateAll) {
+      console.log('Mode: ALL BONUS MODES');
+    } else if (requestedMode) {
+      console.log(`Mode: ${requestedMode}`);
+    } else {
+      console.log('Mode: main (default)');
     }
     console.log('='.repeat(60));
 
-    // 1. Load used ships from database
-    const usedIds = await getUsedShipIds();
-    console.log(`\nUsed ships: ${usedIds.length}`);
+    // Determine which modes to generate
+    let modesToGenerate: GameModeId[];
 
-    // 2. Select random ship with trivia (retry if no trivia found)
-    const MAX_RETRIES = 10;
-    const excludeIds = [...usedIds];
-    let ship: SelectedShip | null = null;
-    let clues: GameClues | null = null;
-
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-      console.log(`\nSelecting random ship (attempt ${attempt}/${MAX_RETRIES})...`);
-      ship = await selectRandomShip(excludeIds);
-
-      if (!ship) {
-        return response.status(500).json({
-          error: 'No eligible ships found',
-          message: 'Check query or reset used ships.',
-        });
-      }
-
-      console.log(`\nSelected: ${ship.name} (${ship.id})`);
-      console.log(`  Country: ${ship.country || 'Unknown'}`);
-      console.log(`  Class: ${ship.className || 'Unknown'}`);
-      console.log(`  Commissioned: ${ship.commissioned || 'Unknown'}`);
-
-      // 3. Fetch clues
-      console.log('\nFetching clue data...');
-      clues = await fetchClues(ship);
-
-      if (clues.trivia) {
-        console.log('  Trivia found, proceeding with this ship.');
-        break;
-      }
-
-      console.log('  No trivia found, trying another ship...');
-      excludeIds.push(ship.id);
-      ship = null;
-      clues = null;
+    if (generateAll) {
+      // Generate all bonus modes (excludes main)
+      modesToGenerate = BONUS_MODE_IDS;
+    } else if (requestedMode && ALL_MODE_IDS.includes(requestedMode as GameModeId)) {
+      modesToGenerate = [requestedMode as GameModeId];
+    } else {
+      // Default to main mode
+      modesToGenerate = ['main'];
     }
 
-    if (!ship || !clues) {
-      return response.status(500).json({
-        error: 'No ship with trivia found',
-        message: `Tried ${MAX_RETRIES} ships but none had trivia.`,
-      });
+    // Generate each mode
+    const results: GenerationResult[] = [];
+
+    for (const modeId of modesToGenerate) {
+      const mode = GAME_MODES[modeId];
+      // Only require trivia for main mode
+      const requireTrivia = modeId === 'main';
+      const result = await generateForMode(mode, gameDate, requireTrivia);
+      results.push(result);
     }
-
-    // 4. Generate line art
-    console.log('\nGenerating line art...');
-    let silhouette: string;
-    try {
-      silhouette = await generateLineArtFromUrl(ship.imageUrl);
-    } catch (error) {
-      console.error('Failed to generate line art:', error);
-      return response.status(500).json({
-        error: 'Failed to generate line art',
-        details: error instanceof Error ? error.message : String(error),
-      });
-    }
-
-    // 5. Build game data
-    const shipIdentity: ShipIdentity = {
-      id: ship.id,
-      name: ship.name,
-      aliases: [],
-    };
-
-    if (ship.className) {
-      shipIdentity.aliases.push(ship.className);
-    }
-
-    // Use forced date if provided, otherwise use today
-    const gameDate = forceDate || new Date().toISOString().split('T')[0];
-
-    const gameData: GameData = {
-      date: gameDate,
-      ship: shipIdentity,
-      silhouette: `data:image/png;base64,${silhouette}`,
-      clues,
-    };
-
-    // 6. Save to Neon PostgreSQL
-    console.log('\nSaving game data to database...');
-    await saveGameData(gameData);
-
-    // 7. Mark ship as used
-    await markShipUsed(ship.id, ship.name);
 
     // Summary
     console.log('\n' + '='.repeat(60));
-    console.log('Generation Complete!');
+    console.log('Generation Summary');
     console.log('='.repeat(60));
 
+    const successful = results.filter((r) => r.success);
+    const failed = results.filter((r) => !r.success);
+
+    for (const result of results) {
+      if (result.success) {
+        console.log(`  ✓ ${result.mode}: ${result.ship?.name} (${result.ship?.class})`);
+      } else {
+        console.log(`  ✗ ${result.mode}: ${result.error}`);
+      }
+    }
+
+    console.log(`\nTotal: ${successful.length}/${results.length} modes generated successfully`);
+
     return response.status(200).json({
-      success: true,
-      ship: {
-        id: ship.id,
-        name: ship.name,
-      },
-      date: gameData.date,
-      clues: {
-        specs: `${clues.specs.class || 'N/A'}, ${clues.specs.commissioned || 'N/A'}`,
-        nation: clues.context.nation,
-        conflicts: clues.context.conflicts.length,
-        hasTrivia: !!clues.trivia,
-      },
-      silhouetteSizeKB: Math.round(silhouette.length / 1024),
+      success: failed.length === 0,
+      date: gameDate,
+      generated: successful.length,
+      failed: failed.length,
+      results,
     });
   } catch (error) {
     console.error('Generation failed:', error);
     return response.status(500).json({
+      success: false,
       error: 'Generation failed',
       details: error instanceof Error ? error.message : String(error),
     });

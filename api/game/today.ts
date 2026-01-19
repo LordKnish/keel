@@ -5,16 +5,13 @@
  * Query parameters:
  *   mode: 'main' | 'ww2' | 'coldwar' | 'carrier' | 'submarine' | 'coastguard'
  *         Defaults to 'main' if not specified.
- *   all: If present, returns a summary of all available modes (for curl convenience)
+ *   all: If present, returns a summary of all available modes
  *
- * Main mode is fetched from the database.
- * Bonus modes are read from static JSON files.
+ * All modes are fetched from PostgreSQL database.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from '@vercel/postgres';
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
 
 type GameModeId = 'main' | 'ww2' | 'coldwar' | 'carrier' | 'submarine' | 'coastguard';
 
@@ -58,41 +55,44 @@ export default async function handler(
   }
 
   try {
+    // Get today's date in UTC
+    const today = new Date().toISOString().split('T')[0];
+
     // Handle 'all' query - return available modes with status
     if ('all' in request.query) {
-      const modes = await Promise.all(
-        VALID_MODES.map(async (modeId) => {
-          const staticPath = join(process.cwd(), 'public', `game-data-${modeId}.json`);
-          const hasStaticFile = existsSync(staticPath);
+      const result = await sql`
+        SELECT mode, game_date, ship_name, clues_specs_class
+        FROM game_data
+        WHERE game_date = ${today}::date
+        ORDER BY mode
+      `;
 
-          let shipName: string | null = null;
-          let shipClass: string | null = null;
-          let date: string | null = null;
-
-          if (hasStaticFile) {
-            try {
-              const content = JSON.parse(readFileSync(staticPath, 'utf-8'));
-              shipName = content.ship?.name || null;
-              shipClass = content.ship?.className || content.clues?.specs?.class || null;
-              date = content.date || null;
-            } catch {
-              // Ignore parse errors
-            }
-          }
-
-          return {
-            mode: modeId,
-            available: hasStaticFile,
-            date,
-            ship: shipName,
-            class: shipClass,
-            endpoint: `/api/game/today?mode=${modeId}`,
-          };
-        })
+      const availableModes = new Map(
+        result.rows.map((row) => [
+          row.mode || 'main',
+          {
+            date: row.game_date?.toISOString().split('T')[0] || null,
+            ship: row.ship_name,
+            class: row.clues_specs_class,
+          },
+        ])
       );
+
+      const modes = VALID_MODES.map((modeId) => {
+        const data = availableModes.get(modeId);
+        return {
+          mode: modeId,
+          available: !!data,
+          date: data?.date || null,
+          ship: data?.ship || null,
+          class: data?.class || null,
+          endpoint: `/api/game/today?mode=${modeId}`,
+        };
+      });
 
       return response.status(200).json({
         success: true,
+        date: today,
         modes,
         usage: {
           single: 'curl /api/game/today?mode=ww2',
@@ -103,40 +103,12 @@ export default async function handler(
 
     // Parse and validate mode parameter
     const modeParam = request.query.mode;
-    const mode: GameModeId = typeof modeParam === 'string' && VALID_MODES.includes(modeParam as GameModeId)
-      ? (modeParam as GameModeId)
-      : 'main';
+    const mode: GameModeId =
+      typeof modeParam === 'string' && VALID_MODES.includes(modeParam as GameModeId)
+        ? (modeParam as GameModeId)
+        : 'main';
 
-    // For bonus modes, try to read from static JSON file
-    if (mode !== 'main') {
-      // In Vercel, public files are in the root of the deployment
-      const staticPath = join(process.cwd(), 'public', `game-data-${mode}.json`);
-
-      if (existsSync(staticPath)) {
-        const fileContent = readFileSync(staticPath, 'utf-8');
-        const gameData = JSON.parse(fileContent);
-
-        // Cache for 5 minutes
-        response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate');
-        return response.status(200).json({
-          success: true,
-          mode,
-          ...gameData,
-        });
-      }
-
-      return response.status(404).json({
-        success: false,
-        mode,
-        error: `Game data not available for mode '${mode}'`,
-        hint: `Static file /game-data-${mode}.json not found`,
-      });
-    }
-
-    // Get today's date in UTC
-    const today = new Date().toISOString().split('T')[0];
-
-    // Fetch today's game from database
+    // Fetch today's game from database for the specified mode
     const result = await sql`
       SELECT
         game_date,
@@ -154,7 +126,7 @@ export default async function handler(
         clues_trivia,
         clues_photo
       FROM game_data
-      WHERE game_date = ${today}::date
+      WHERE game_date = ${today}::date AND (mode = ${mode} OR (mode IS NULL AND ${mode} = 'main'))
       LIMIT 1
     `;
 
@@ -162,7 +134,7 @@ export default async function handler(
       return response.status(404).json({
         success: false,
         mode,
-        error: 'No game found for today',
+        error: `No game found for today in mode '${mode}'`,
         date: today,
       });
     }
