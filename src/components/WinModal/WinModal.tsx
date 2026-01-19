@@ -62,7 +62,7 @@ export function WinModal({
 
     const timeStr = formatTime(timeTaken);
 
-    return `⚓ Keel ${modeName} ${today}\n🚢 ${guessCount}/${totalTurns} • ⏱️ ${timeStr}\n${resultEmojis}\n\nPlay at: ${window.location.origin}`;
+    return `⚓ Keel ${modeName} ${today}\n🚢 ${guessCount}/${totalTurns} • ⏱️ ${timeStr}\n${resultEmojis}\n\nPlay at: ${window.location.href}`;
   }, [guessResults, guessCount, totalTurns, timeTaken, modeName]);
 
   const handleCopy = useCallback(async () => {
