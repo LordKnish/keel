@@ -108,6 +108,49 @@ function extractTrivia(summary: WikipediaSummary | null): string | null {
 }
 
 /**
+ * Remove class name from trivia text to avoid giving away the answer.
+ * Checks full class name first, then individual words.
+ * Also cleans up any resulting double spaces.
+ */
+function filterClassNameFromTrivia(
+  trivia: string | null,
+  className: string | null
+): string | null {
+  if (!trivia || !className) {
+    return trivia;
+  }
+
+  let filtered = trivia;
+
+  // First, try to remove the full class name (case-insensitive)
+  const fullNameRegex = new RegExp(
+    className.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+    'gi'
+  );
+  filtered = filtered.replace(fullNameRegex, '');
+
+  // Then check individual words (only if 2+ chars to avoid removing common words)
+  const words = className.split(/\s+/).filter((word) => word.length > 2);
+  for (const word of words) {
+    const wordRegex = new RegExp(
+      `\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`,
+      'gi'
+    );
+    filtered = filtered.replace(wordRegex, '');
+  }
+
+  // Clean up double spaces and trim
+  filtered = filtered.replace(/\s{2,}/g, ' ').trim();
+
+  // If we removed too much, return null
+  if (filtered.length < 20) {
+    return null;
+  }
+
+  return filtered;
+}
+
+/**
  * Build specs clue from ship data.
  */
 function buildSpecsClue(ship: SelectedShip): SpecsClue {
@@ -142,6 +185,7 @@ export async function fetchClues(ship: SelectedShip): Promise<GameClues> {
     console.log(`  Fetching Wikipedia summary for ${ship.wikipediaTitle}...`);
     const summary = await fetchWikipediaSummary(ship.wikipediaTitle);
     trivia = extractTrivia(summary);
+    trivia = filterClassNameFromTrivia(trivia, ship.className);
     if (trivia) {
       console.log(`  Found trivia: "${trivia.substring(0, 50)}..."`);
     }
