@@ -40,7 +40,10 @@ export function ShipSearch({ onSelect, disabled = false, excludeIds = [], target
         if (targetClass && !excludeIds.includes(targetClass.id)) {
           const queryLower = value.toLowerCase();
           const targetMatches = targetClass.name.toLowerCase().includes(queryLower);
-          const targetAlreadyIncluded = results.some(item => item.id === targetClass.id);
+          const targetAlreadyIncluded = results.some(
+            item => item.id === targetClass.id ||
+                    item.name.toLowerCase() === targetClass.name.toLowerCase()
+          );
 
           if (targetMatches && !targetAlreadyIncluded) {
             results = [targetClass, ...results];

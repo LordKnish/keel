@@ -113,3 +113,21 @@
 ## v2.0 Complete
 
 All phases complete. 5 bonus game modes available with sequential unlocking.
+
+---
+
+## v2.1: Bug Fixes and Polish
+
+**Goal**: Fix search dropdown duplicates, remove class names from trivia text, and ensure game state persists across page refreshes.
+
+### Phase 9: Search and trivia data fixes
+- [ ] Fix search dropdown to prevent adding class if already in results
+- [ ] Filter class name from trivia (check full name, then individual words)
+- [ ] Fix double spaces in trivia after name removal
+- [ ] Regenerate game data for all modes
+
+### Phase 10: Game state persistence
+- [ ] Restore completed game state on page refresh
+- [ ] Show win UI immediately if mode already completed today
+- [ ] Ensure mode unlocking works without replaying completed modes
+- [ ] Test refresh behavior across all modes

@@ -1,15 +1,14 @@
 # Project State
 
 ## Current Milestone
-**v2.0: Bonus Game Modes** - Complete
+**v2.1: Bug Fixes and Polish** - In Progress
 
 ## Current Phase
-None (milestone complete)
+Phase 9: Search and trivia data fixes
 
 ## Status
-- Phase 6: **Complete** - Multi-mode architecture
-- Phase 7: **Complete** - Mode Selection UI with Sequential Unlocking
-- Phase 8: **Complete** - Testing and polish
+- Phase 9: **Pending** - Search and trivia data fixes
+- Phase 10: **Pending** - Game state persistence
 
 ## Previous Milestones
 - **v2.0: Bonus Game Modes** - Complete
@@ -23,6 +22,11 @@ None (milestone complete)
 - Separate JSON files per mode (game-data-{mode}.json)
 - Per-mode used ship tracking
 - API now supports all modes via `?mode=xxx` query parameter
+
+## v2.1 Bug Fixes
+1. **Search dropdown duplicates**: Prevent adding class if already in search results
+2. **Class name in trivia**: Remove class name (full and individual words) from trivia, fix double spaces
+3. **Persistence on refresh**: Restore completed game state so mode unlocking works without replaying
 
 ## Ship Pool Research (Phase 6)
 - Main: ~61 ships (modern 1980+)
