@@ -4,7 +4,6 @@ import {
   ALL_MODE_IDS,
   type GameModeId,
   type ModeResult,
-  isModeUnlocked,
 } from '../../types/modes';
 import './ModeMenu.css';
 
@@ -51,11 +50,8 @@ export function ModeMenu({ currentMode, completions, onSelectMode }: ModeMenuPro
   }, [isOpen]);
 
   const handleModeClick = (modeId: GameModeId) => {
-    const unlocked = isModeUnlocked(modeId, completions);
-    if (unlocked) {
-      onSelectMode(modeId);
-      setIsOpen(false);
-    }
+    onSelectMode(modeId);
+    setIsOpen(false);
   };
 
   return (
@@ -94,16 +90,14 @@ export function ModeMenu({ currentMode, completions, onSelectMode }: ModeMenuPro
             <ul className="mode-menu__list">
               {ALL_MODE_IDS.map((modeId) => {
                 const config = GAME_MODES[modeId];
-                const isUnlocked = isModeUnlocked(modeId, completions);
                 const isCompleted = !!completions[modeId];
                 const isCurrent = modeId === currentMode;
 
                 return (
                   <li key={modeId}>
                     <button
-                      className={`mode-menu__item ${isCurrent ? 'mode-menu__item--current' : ''} ${!isUnlocked ? 'mode-menu__item--locked' : ''} ${isCompleted ? 'mode-menu__item--completed' : ''}`}
+                      className={`mode-menu__item ${isCurrent ? 'mode-menu__item--current' : ''} ${isCompleted ? 'mode-menu__item--completed' : ''}`}
                       onClick={() => handleModeClick(modeId)}
-                      disabled={!isUnlocked}
                       type="button"
                       role="menuitem"
                       aria-current={isCurrent ? 'true' : undefined}
@@ -114,7 +108,6 @@ export function ModeMenu({ currentMode, completions, onSelectMode }: ModeMenuPro
                         <span className="mode-menu__item-desc">{config.description}</span>
                       </div>
                       <span className="mode-menu__item-status">
-                        {!isUnlocked && <span className="mode-menu__lock" aria-label="Locked">&#x1F512;</span>}
                         {isCompleted && <span className="mode-menu__check" aria-label="Completed">&#x2713;</span>}
                       </span>
                     </button>

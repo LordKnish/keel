@@ -3,14 +3,12 @@
  * Persists completion state across page refreshes and resets daily.
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   type GameModeId,
   type ModeResult,
   type DailyCompletion,
   ALL_MODE_IDS,
-  getUnlockedModes,
-  isModeUnlocked,
 } from '../types/modes';
 
 const STORAGE_KEY = 'keel-daily-completion';
@@ -88,25 +86,10 @@ export function useModeCompletion(mode: GameModeId) {
     [mode]
   );
 
-  // Check if main mode is complete (for unlocking bonus modes)
-  const isMainComplete = !!completion.modes.main;
-
-  // Get list of unlocked modes based on completions
-  const unlockedModes = useMemo(
-    () => getUnlockedModes(completion.modes),
-    [completion.modes]
-  );
-
-  // Check if a specific mode is unlocked
-  const checkIsUnlocked = useCallback(
-    (modeId: GameModeId): boolean => isModeUnlocked(modeId, completion.modes),
-    [completion.modes]
-  );
-
-  // Get the next playable mode (first unlocked but incomplete mode)
+  // Get the next playable mode (first incomplete mode)
   const getNextPlayableMode = useCallback((): GameModeId | null => {
     for (const modeId of ALL_MODE_IDS) {
-      if (isModeUnlocked(modeId, completion.modes) && !completion.modes[modeId]) {
+      if (!completion.modes[modeId]) {
         return modeId;
       }
     }
@@ -120,15 +103,9 @@ export function useModeCompletion(mode: GameModeId) {
     result,
     /** Mark the current mode as complete with result */
     markComplete,
-    /** Whether main mode is complete (for bonus mode gating) */
-    isMainComplete,
     /** All completion data for all modes */
     allCompletions: completion.modes,
-    /** List of currently unlocked mode IDs */
-    unlockedModes,
-    /** Check if a specific mode is unlocked */
-    isUnlocked: checkIsUnlocked,
-    /** Get the next playable (unlocked but incomplete) mode */
+    /** Get the next playable (incomplete) mode */
     getNextPlayableMode,
   };
 }

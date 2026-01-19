@@ -1,6 +1,15 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import App from './App';
+
+function renderApp(initialRoute = '/') {
+  return render(
+    <MemoryRouter initialEntries={[initialRoute]}>
+      <App />
+    </MemoryRouter>
+  );
+}
 
 // Mock class list data for tests (ship-list.json now contains classes)
 const mockClassList = {
@@ -61,19 +70,19 @@ describe('App', () => {
   });
 
   it('shows loading state initially', () => {
-    render(<App />);
+    renderApp();
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
   it('renders the Keel title after loading', async () => {
-    render(<App />);
+    renderApp();
     await waitFor(() => {
       expect(screen.getByText('Keel')).toBeInTheDocument();
     });
   });
 
   it('renders the mode name as tagline after loading', async () => {
-    render(<App />);
+    renderApp();
     await waitFor(() => {
       // Default mode is 'main' which has name 'Daily Keel'
       expect(screen.getByText('Daily Keel')).toBeInTheDocument();
@@ -81,21 +90,21 @@ describe('App', () => {
   });
 
   it('renders the silhouette component', async () => {
-    render(<App />);
+    renderApp();
     await waitFor(() => {
       expect(screen.getByAltText('Mystery warship silhouette')).toBeInTheDocument();
     });
   });
 
   it('renders the turn indicator', async () => {
-    render(<App />);
+    renderApp();
     await waitFor(() => {
       expect(screen.getByRole('group', { name: /Turn/ })).toBeInTheDocument();
     });
   });
 
   it('renders the class search input', async () => {
-    render(<App />);
+    renderApp();
     await waitFor(() => {
       expect(screen.getByLabelText('Search for a ship class')).toBeInTheDocument();
     });
@@ -104,7 +113,7 @@ describe('App', () => {
   it('shows error state when fetch fails', async () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network error'));
 
-    render(<App />);
+    renderApp();
     await waitFor(() => {
       expect(screen.getByText(/Failed to load game data/)).toBeInTheDocument();
     });

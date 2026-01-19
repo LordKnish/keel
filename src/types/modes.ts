@@ -10,10 +10,8 @@ export interface GameModeConfig {
   description: string;
   icon: string;
   dataFile: string;
-  /** Order in unlock sequence (0 = main, 1-5 = bonus modes) */
-  unlockOrder: number;
-  /** Mode that must be completed to unlock this one (null for main) */
-  prerequisiteMode: GameModeId | null;
+  /** URL path for this mode (e.g., "/ww2", "/cold-war") */
+  path: string;
 }
 
 /**
@@ -26,8 +24,7 @@ export const GAME_MODES: Record<GameModeId, GameModeConfig> = {
     description: 'Modern warships (1980+)',
     icon: '⚓',
     dataFile: '/game-data-main.json',
-    unlockOrder: 0,
-    prerequisiteMode: null,
+    path: '/',
   },
   ww2: {
     id: 'ww2',
@@ -35,8 +32,7 @@ export const GAME_MODES: Record<GameModeId, GameModeConfig> = {
     description: 'World War 2 era (1939-1945)',
     icon: '🎖️',
     dataFile: '/game-data-ww2.json',
-    unlockOrder: 1,
-    prerequisiteMode: 'main',
+    path: '/ww2',
   },
   coldwar: {
     id: 'coldwar',
@@ -44,8 +40,7 @@ export const GAME_MODES: Record<GameModeId, GameModeConfig> = {
     description: 'Cold War era (1947-1991)',
     icon: '☢️',
     dataFile: '/game-data-coldwar.json',
-    unlockOrder: 2,
-    prerequisiteMode: 'ww2',
+    path: '/cold-war',
   },
   carrier: {
     id: 'carrier',
@@ -53,8 +48,7 @@ export const GAME_MODES: Record<GameModeId, GameModeConfig> = {
     description: 'Aircraft carriers only',
     icon: '🛫',
     dataFile: '/game-data-carrier.json',
-    unlockOrder: 3,
-    prerequisiteMode: 'coldwar',
+    path: '/carrier',
   },
   submarine: {
     id: 'submarine',
@@ -62,8 +56,7 @@ export const GAME_MODES: Record<GameModeId, GameModeConfig> = {
     description: 'Submarines only',
     icon: '🔱',
     dataFile: '/game-data-submarine.json',
-    unlockOrder: 4,
-    prerequisiteMode: 'carrier',
+    path: '/submarine',
   },
   coastguard: {
     id: 'coastguard',
@@ -71,8 +64,7 @@ export const GAME_MODES: Record<GameModeId, GameModeConfig> = {
     description: 'Small vessels',
     icon: '🚤',
     dataFile: '/game-data-coastguard.json',
-    unlockOrder: 5,
-    prerequisiteMode: 'submarine',
+    path: '/small-ships',
   },
 };
 
@@ -106,31 +98,10 @@ export interface DailyCompletion {
 }
 
 /**
- * Get list of unlocked modes based on completion status.
- * A mode is unlocked if its prerequisite mode has been completed (win or lose).
+ * Get mode ID from URL path.
+ * Returns 'main' if path doesn't match any mode.
  */
-export function getUnlockedModes(completions: Partial<Record<GameModeId, ModeResult>>): GameModeId[] {
-  return ALL_MODE_IDS.filter((modeId) => {
-    const config = GAME_MODES[modeId];
-    // Main is always unlocked
-    if (config.prerequisiteMode === null) {
-      return true;
-    }
-    // Other modes require prerequisite to be completed
-    return !!completions[config.prerequisiteMode];
-  });
-}
-
-/**
- * Check if a specific mode is unlocked.
- */
-export function isModeUnlocked(
-  modeId: GameModeId,
-  completions: Partial<Record<GameModeId, ModeResult>>
-): boolean {
-  const config = GAME_MODES[modeId];
-  if (config.prerequisiteMode === null) {
-    return true;
-  }
-  return !!completions[config.prerequisiteMode];
+export function getModeByPath(path: string): GameModeId {
+  const mode = ALL_MODE_IDS.find((modeId) => GAME_MODES[modeId].path === path);
+  return mode || 'main';
 }

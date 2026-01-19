@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Confetti from 'react-confetti';
 import type { GameData, GuessResult } from './types/game';
-import { GAME_MODES, type GameModeId } from './types/modes';
+import { GAME_MODES, getModeByPath, type GameModeId } from './types/modes';
 import { useModeCompletion } from './hooks/useModeCompletion';
 import { GameLayout } from './components/Game/GameLayout';
 import { Silhouette } from './components/Silhouette/Silhouette';
@@ -20,12 +21,14 @@ import './styles/animations.css';
 import './App.css';
 
 function App() {
-  // Current game mode
-  const [currentMode, setCurrentMode] = useState<GameModeId>('main');
+  // Get current mode from URL path
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentMode = getModeByPath(location.pathname);
   const modeConfig = GAME_MODES[currentMode];
 
   // Mode completion tracking
-  const { isComplete: isModeComplete, result: savedResult, markComplete, allCompletions, isUnlocked } = useModeCompletion(currentMode);
+  const { isComplete: isModeComplete, result: savedResult, markComplete, allCompletions } = useModeCompletion(currentMode);
 
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -253,11 +256,9 @@ function App() {
   // Handle mode selection from menu
   const handleModeSelect = useCallback(
     (mode: GameModeId) => {
-      if (isUnlocked(mode)) {
-        setCurrentMode(mode);
-      }
+      navigate(GAME_MODES[mode].path);
     },
-    [isUnlocked]
+    [navigate]
   );
 
   if (loading) {
