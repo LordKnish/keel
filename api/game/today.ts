@@ -58,16 +58,46 @@ export default async function handler(
   }
 
   try {
-    // Handle 'all' query - return available modes summary
+    // Handle 'all' query - return available modes with status
     if ('all' in request.query) {
-      const modes = VALID_MODES.map((modeId) => ({
-        mode: modeId,
-        endpoint: `/api/game/today?mode=${modeId}`,
-        staticFile: `/game-data-${modeId}.json`,
-      }));
+      const modes = await Promise.all(
+        VALID_MODES.map(async (modeId) => {
+          const staticPath = join(process.cwd(), 'public', `game-data-${modeId}.json`);
+          const hasStaticFile = existsSync(staticPath);
+
+          let shipName: string | null = null;
+          let shipClass: string | null = null;
+          let date: string | null = null;
+
+          if (hasStaticFile) {
+            try {
+              const content = JSON.parse(readFileSync(staticPath, 'utf-8'));
+              shipName = content.ship?.name || null;
+              shipClass = content.ship?.className || content.clues?.specs?.class || null;
+              date = content.date || null;
+            } catch {
+              // Ignore parse errors
+            }
+          }
+
+          return {
+            mode: modeId,
+            available: hasStaticFile,
+            date,
+            ship: shipName,
+            class: shipClass,
+            endpoint: `/api/game/today?mode=${modeId}`,
+          };
+        })
+      );
+
       return response.status(200).json({
-        availableModes: modes,
-        usage: 'curl /api/game/today?mode=ww2',
+        success: true,
+        modes,
+        usage: {
+          single: 'curl /api/game/today?mode=ww2',
+          list: 'curl /api/game/today?all',
+        },
       });
     }
 
@@ -88,10 +118,16 @@ export default async function handler(
 
         // Cache for 5 minutes
         response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate');
-        return response.status(200).json(gameData);
+        return response.status(200).json({
+          success: true,
+          mode,
+          ...gameData,
+        });
       }
 
       return response.status(404).json({
+        success: false,
+        mode,
         error: `Game data not available for mode '${mode}'`,
         hint: `Static file /game-data-${mode}.json not found`,
       });
@@ -124,6 +160,8 @@ export default async function handler(
 
     if (result.rows.length === 0) {
       return response.status(404).json({
+        success: false,
+        mode,
         error: 'No game found for today',
         date: today,
       });
@@ -160,10 +198,15 @@ export default async function handler(
     // Cache for 5 minutes
     response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate');
 
-    return response.status(200).json(gameData);
+    return response.status(200).json({
+      success: true,
+      mode,
+      ...gameData,
+    });
   } catch (error) {
     console.error('Failed to fetch game data:', error);
     return response.status(500).json({
+      success: false,
       error: 'Failed to fetch game data',
       details: error instanceof Error ? error.message : String(error),
     });
