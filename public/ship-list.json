@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-01-18T22:01:34.501Z",
-  "count": 44,
+  "generatedAt": "2026-01-19T09:02:42.095Z",
+  "count": 49,
   "classes": [
     {
       "id": "class:ada-class-corvette",
@@ -25,6 +25,10 @@
     {
       "id": "class:aquitaine-class-frigate",
       "name": "Aquitaine-class frigate"
+    },
+    {
+      "id": "class:arleigh-burke-class-destroyer",
+      "name": "Arleigh Burke-class destroyer"
     },
     {
       "id": "class:baden-w-rttemberg-class-frigate",
@@ -131,6 +135,10 @@
       "name": "Santa María-class frigate"
     },
     {
+      "id": "class:sovremenny-class-destroyer",
+      "name": "Sovremenny-class destroyer"
+    },
+    {
       "id": "class:spruance-class-destroyer",
       "name": "Spruance-class destroyer"
     },
@@ -143,6 +151,10 @@
       "name": "Sultan Moulay Ismail-class frigate"
     },
     {
+      "id": "class:type-051-destroyer",
+      "name": "Type 051 destroyer"
+    },
+    {
       "id": "class:type-054a-frigate",
       "name": "Type 054A frigate"
     },
@@ -153,6 +165,14 @@
     {
       "id": "class:type-23-frigate",
       "name": "Type 23 frigate"
+    },
+    {
+      "id": "class:type-42-guided-missile-destroyer",
+      "name": "Type 42 guided missile destroyer"
+    },
+    {
+      "id": "class:type-45-guided-missile-destroyer",
+      "name": "Type 45 guided missile destroyer"
     },
     {
       "id": "class:udaloy-class-destroyer",

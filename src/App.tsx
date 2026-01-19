@@ -361,7 +361,15 @@ function App() {
               )}
             </div>
           ) : (
-            <ShipSearch onSelect={handleShipSelect} disabled={isGameComplete} excludeIds={guessedIds} />
+            <ShipSearch
+              onSelect={handleShipSelect}
+              disabled={isGameComplete}
+              excludeIds={guessedIds}
+              targetClass={{
+                id: gameData.ship.id,
+                name: gameData.ship.className || gameData.ship.aliases[0] || gameData.ship.name
+              }}
+            />
           )
         }
       />

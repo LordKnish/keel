@@ -9,13 +9,15 @@ export interface ShipSearchProps {
   disabled?: boolean;
   /** Previously guessed class IDs to exclude from suggestions */
   excludeIds?: string[];
+  /** Target ship class that should always appear in results when relevant */
+  targetClass?: ShipListEntry;
 }
 
 /**
  * Ship class search autocomplete component.
  * Provides accessible fuzzy search for ship class names.
  */
-export function ShipSearch({ onSelect, disabled = false, excludeIds = [] }: ShipSearchProps) {
+export function ShipSearch({ onSelect, disabled = false, excludeIds = [], targetClass }: ShipSearchProps) {
   const { search, isLoading, error } = useShipSearch();
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -32,7 +34,19 @@ export function ShipSearch({ onSelect, disabled = false, excludeIds = [] }: Ship
 
       // Perform search and update items in the same handler
       if (value.length >= 2) {
-        const results = search(value).filter(item => !excludeIds.includes(item.id));
+        let results = search(value).filter(item => !excludeIds.includes(item.id));
+
+        // Ensure target class is always in results if it matches the query
+        if (targetClass && !excludeIds.includes(targetClass.id)) {
+          const queryLower = value.toLowerCase();
+          const targetMatches = targetClass.name.toLowerCase().includes(queryLower);
+          const targetAlreadyIncluded = results.some(item => item.id === targetClass.id);
+
+          if (targetMatches && !targetAlreadyIncluded) {
+            results = [targetClass, ...results];
+          }
+        }
+
         setItems(results);
         setOpen(results.length > 0);
       } else {
@@ -40,7 +54,7 @@ export function ShipSearch({ onSelect, disabled = false, excludeIds = [] }: Ship
         setOpen(false);
       }
     },
-    [search, excludeIds]
+    [search, excludeIds, targetClass]
   );
 
   const handleSelect = useCallback(
