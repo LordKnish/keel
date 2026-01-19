@@ -77,6 +77,12 @@ export function WinModal({
     }
   }, [generateShareText]);
 
+  const handleShareToX = useCallback(() => {
+    const shareText = generateShareText();
+    const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+    window.open(tweetUrl, '_blank', 'noopener,noreferrer');
+  }, [generateShareText]);
+
   if (!isOpen) return null;
 
   // Display class name as primary with ship name in parentheses
@@ -119,13 +125,22 @@ export function WinModal({
             ))}
           </div>
 
-          <button
-            className="win-modal__share-button"
-            onClick={handleCopy}
-            type="button"
-          >
-            {copied ? '✓ Copied!' : 'Share Result 📋'}
-          </button>
+          <div className="win-modal__share-buttons">
+            <button
+              className="win-modal__share-button"
+              onClick={handleCopy}
+              type="button"
+            >
+              {copied ? '✓ Copied!' : 'Copy 📋'}
+            </button>
+            <button
+              className="win-modal__share-button win-modal__share-button--x"
+              onClick={handleShareToX}
+              type="button"
+            >
+              Share on X
+            </button>
+          </div>
 
           <p className="win-modal__share-preview">{generateShareText()}</p>
         </div>
