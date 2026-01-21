@@ -150,6 +150,10 @@
   transition: background-color var(--transition-fast), transform var(--transition-fast);
 }
 
+.win-modal__share-button i {
+  color: white;
+}
+
 .win-modal__share-button:hover {
   background-color: #5a9a54;
   transform: scale(1.02);
