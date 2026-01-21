@@ -26,9 +26,10 @@ export function ShipSearch({ onSelect, disabled = false, excludeIds = [], target
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
+  // Use onInput instead of onChange to handle paste, drag-drop, and typing
   const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
+    (e: React.FormEvent<HTMLInputElement>) => {
+      const value = (e.target as HTMLInputElement).value;
       setInputValue(value);
       setSelectedIndex(0);
 
@@ -50,6 +51,19 @@ export function ShipSearch({ onSelect, disabled = false, excludeIds = [], target
           }
         }
 
+        // Check for exact match (case-insensitive) - auto-submit if found
+        const exactMatch = results.find(
+          item => item.name.toLowerCase() === value.toLowerCase()
+        );
+        if (exactMatch) {
+          onSelect(exactMatch);
+          setInputValue('');
+          setItems([]);
+          setOpen(false);
+          setSelectedIndex(0);
+          return;
+        }
+
         setItems(results);
         setOpen(results.length > 0);
       } else {
@@ -57,7 +71,7 @@ export function ShipSearch({ onSelect, disabled = false, excludeIds = [], target
         setOpen(false);
       }
     },
-    [search, excludeIds, targetClass]
+    [search, excludeIds, targetClass, onSelect]
   );
 
   const handleSelect = useCallback(
@@ -166,7 +180,7 @@ export function ShipSearch({ onSelect, disabled = false, excludeIds = [], target
           className="ship-search__input"
           placeholder={isLoading ? 'Loading classes...' : 'Type a ship class...'}
           value={inputValue}
-          onChange={handleInputChange}
+          onInput={handleInputChange}
           onKeyDown={handleKeyDown}
           disabled={disabled || isLoading}
           aria-label="Search for a ship class"

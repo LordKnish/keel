@@ -140,4 +140,47 @@ describe('ShipSearch', () => {
     // Should not show any results
     expect(screen.queryByText('Fletcher-class destroyer')).not.toBeInTheDocument();
   });
+
+  it('shows search results when pasting text', async () => {
+    const user = userEvent.setup();
+    render(<ShipSearch onSelect={vi.fn()} />);
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Type a ship class...')).toBeInTheDocument();
+    });
+
+    const input = screen.getByLabelText('Search for a ship class');
+
+    // Simulate paste by clicking and pasting
+    await user.click(input);
+    await user.paste('Fletcher');
+
+    await waitFor(() => {
+      expect(screen.getByText('Fletcher-class destroyer')).toBeInTheDocument();
+    });
+  });
+
+  it('auto-submits when exact class name is typed', async () => {
+    const onSelect = vi.fn();
+    const user = userEvent.setup();
+    render(<ShipSearch onSelect={onSelect} />);
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Type a ship class...')).toBeInTheDocument();
+    });
+
+    const input = screen.getByLabelText('Search for a ship class');
+    await user.type(input, 'Fletcher-class destroyer');
+
+    // Should auto-submit without needing to press Enter or click
+    await waitFor(() => {
+      expect(onSelect).toHaveBeenCalledWith({
+        id: 'class:fletcher-class-destroyer',
+        name: 'Fletcher-class destroyer',
+      });
+    });
+
+    // Input should be cleared
+    expect(input).toHaveValue('');
+  });
 });
