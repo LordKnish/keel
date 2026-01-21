@@ -1,4 +1,7 @@
 import { useState, useCallback } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCopy, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faXTwitter, faBluesky, faFacebookF, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import type { GuessResult } from '../../types/game';
 import './WinModal.css';
 
@@ -151,11 +154,7 @@ export function WinModal({
               type="button"
               aria-label={copied ? 'Copied' : 'Copy to clipboard'}
             >
-              {copied ? (
-                <i className="fa-solid fa-check" aria-hidden="true" />
-              ) : (
-                <i className="fa-regular fa-copy" aria-hidden="true" />
-              )}
+              <FontAwesomeIcon icon={copied ? faCheck : faCopy} />
             </button>
             <button
               className="win-modal__share-button win-modal__share-button--x"
@@ -163,7 +162,7 @@ export function WinModal({
               type="button"
               aria-label="Share on X"
             >
-              <i className="fa-brands fa-x-twitter" aria-hidden="true" />
+              <FontAwesomeIcon icon={faXTwitter} />
             </button>
             <button
               className="win-modal__share-button win-modal__share-button--bluesky"
@@ -171,7 +170,7 @@ export function WinModal({
               type="button"
               aria-label="Share on Bluesky"
             >
-              <i className="fa-brands fa-bluesky" aria-hidden="true" />
+              <FontAwesomeIcon icon={faBluesky} />
             </button>
             <button
               className="win-modal__share-button win-modal__share-button--facebook"
@@ -179,7 +178,7 @@ export function WinModal({
               type="button"
               aria-label="Share on Facebook"
             >
-              <i className="fa-brands fa-facebook-f" aria-hidden="true" />
+              <FontAwesomeIcon icon={faFacebookF} />
             </button>
             <button
               className="win-modal__share-button win-modal__share-button--whatsapp"
@@ -187,7 +186,7 @@ export function WinModal({
               type="button"
               aria-label="Share on WhatsApp"
             >
-              <i className="fa-brands fa-whatsapp" aria-hidden="true" />
+              <FontAwesomeIcon icon={faWhatsapp} />
             </button>
           </div>
 

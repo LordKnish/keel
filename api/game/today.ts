@@ -3,7 +3,7 @@
  * GET /api/game/today?mode=main
  *
  * Query parameters:
- *   mode: 'main' | 'ww2' | 'coldwar' | 'carrier' | 'submarine' | 'coastguard'
+ *   mode: 'main' | 'ww2' | 'coldwar' | 'amphibious' | 'submarine' | 'coastguard'
  *         Defaults to 'main' if not specified.
  *   all: If present, returns a summary of all available modes
  *
@@ -13,9 +13,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from '@vercel/postgres';
 
-type GameModeId = 'main' | 'ww2' | 'coldwar' | 'carrier' | 'submarine' | 'coastguard';
+type GameModeId = 'main' | 'ww2' | 'coldwar' | 'amphibious' | 'submarine' | 'coastguard';
 
-const VALID_MODES: GameModeId[] = ['main', 'ww2', 'coldwar', 'carrier', 'submarine', 'coastguard'];
+const VALID_MODES: GameModeId[] = ['main', 'ww2', 'coldwar', 'amphibious', 'submarine', 'coastguard'];
 
 interface GameData {
   date: string;
