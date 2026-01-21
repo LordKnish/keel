@@ -1,14 +1,15 @@
 # Project State
 
 ## Current Milestone
-**v2.1: Bug Fixes and Polish** - Complete
+**v2.2: UX Improvements and Infrastructure** - In Progress
 
 ## Current Phase
-None (milestone complete)
+Phase 11: Social sharing expansion (not started)
 
 ## Status
-- Phase 9: **Complete** - Search and trivia data fixes (3 commits)
-- Phase 10: **Complete** - Game state persistence (2 commits)
+- Phase 11: **Pending** - Social sharing expansion (Bluesky, Facebook)
+- Phase 12: **Pending** - Search suggestions improvements
+- Phase 13: **Pending** - Cron job multi-mode generation
 
 ## Previous Milestones
 - **v2.1: Bug Fixes and Polish** - Complete
@@ -24,18 +25,10 @@ None (milestone complete)
 - Per-mode used ship tracking
 - API now supports all modes via `?mode=xxx` query parameter
 
-## v2.1 Bug Fixes
-1. **Search dropdown duplicates**: Prevent adding class if already in search results
-2. **Class name in trivia**: Remove class name (full and individual words) from trivia, fix double spaces
-3. **Persistence on refresh**: Restore completed game state so mode unlocking works without replaying
-
-## Ship Pool Research (Phase 6)
-- Main: ~61 ships (modern 1980+)
-- WW2: 332 ships (1939-1945)
-- Cold War: 225 ships (1947-1991)
-- Aircraft Carrier: 30 ships
-- Submarine: 71 ships
-- Coast Guard: 33 ships
+## v2.2 Goals
+1. **Social sharing**: Add Bluesky and Facebook share buttons to WinModal
+2. **Search UX**: Fix paste not triggering suggestions, auto-submit on exact match
+3. **Cron fix**: Generate all modes daily, not just main
 
 ## Notes
 - Ship pool expanded to 61 ships (added guided missile destroyers)

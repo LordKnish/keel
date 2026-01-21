@@ -139,3 +139,37 @@ All phases complete. 5 bonus game modes available with sequential unlocking.
 ## v2.1 Complete
 
 All phases complete. Bug fixes and persistence improvements implemented.
+
+---
+
+## v2.2: UX Improvements and Infrastructure
+
+**Goal**: Improve social sharing options, enhance search suggestion UX, and fix cron job to generate all game modes daily.
+
+### Phase 11: Social sharing expansion
+- [ ] Add "Share on Bluesky" button to WinModal
+- [ ] Add "Share on Facebook" button to WinModal
+- [ ] Update share button styling for 3-button layout
+- [ ] Test share functionality on each platform
+
+**Research needed**: Bluesky and Facebook intent URL formats
+
+### Phase 12: Search suggestions improvements
+- [ ] Fix paste event not triggering suggestions (add onPaste handler)
+- [ ] Implement auto-submit when exact match is typed
+- [ ] Reduce Fuse.js threshold for better partial matching
+- [ ] Add debouncing to prevent rapid-fire searches
+- [ ] Update tests for new search behaviors
+
+**Key issues to fix**:
+- Copy/paste doesn't trigger dropdown
+- Exact matches should auto-submit without pressing Enter
+- Near-matches not always appearing in results
+
+### Phase 13: Cron job multi-mode generation
+- [ ] Update vercel.json cron to call with `?all=everything` parameter
+- [ ] Add logging to confirm all modes generated
+- [ ] Test cron endpoint locally with all modes
+- [ ] Verify each mode has game data for today
+
+**Current issue**: Cron only generates main mode, bonus modes not regenerated daily

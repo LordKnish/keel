@@ -168,6 +168,22 @@
   background-color: #333;
 }
 
+.win-modal__share-button--bluesky {
+  background-color: #0085ff;
+}
+
+.win-modal__share-button--bluesky:hover {
+  background-color: #0066cc;
+}
+
+.win-modal__share-button--facebook {
+  background-color: #1877f2;
+}
+
+.win-modal__share-button--facebook:hover {
+  background-color: #1466d8;
+}
+
 .win-modal__share-preview {
   margin-top: var(--space-6);
   padding: var(--space-4);

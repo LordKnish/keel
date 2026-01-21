@@ -83,6 +83,19 @@ export function WinModal({
     window.open(tweetUrl, '_blank', 'noopener,noreferrer');
   }, [generateShareText]);
 
+  const handleShareToBluesky = useCallback(() => {
+    const shareText = generateShareText();
+    const blueskyUrl = `https://bsky.app/intent/compose?text=${encodeURIComponent(shareText)}`;
+    window.open(blueskyUrl, '_blank', 'noopener,noreferrer');
+  }, [generateShareText]);
+
+  const handleShareToFacebook = useCallback(() => {
+    const shareText = generateShareText();
+    const gameUrl = window.location.href;
+    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(gameUrl)}&quote=${encodeURIComponent(shareText)}`;
+    window.open(fbUrl, '_blank', 'noopener,noreferrer');
+  }, [generateShareText]);
+
   if (!isOpen) return null;
 
   // Display class name as primary with ship name in parentheses
@@ -139,6 +152,20 @@ export function WinModal({
               type="button"
             >
               Share on X
+            </button>
+            <button
+              className="win-modal__share-button win-modal__share-button--bluesky"
+              onClick={handleShareToBluesky}
+              type="button"
+            >
+              Share on Bluesky
+            </button>
+            <button
+              className="win-modal__share-button win-modal__share-button--facebook"
+              onClick={handleShareToFacebook}
+              type="button"
+            >
+              Share on Facebook
             </button>
           </div>
 
