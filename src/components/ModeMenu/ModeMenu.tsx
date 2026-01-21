@@ -102,7 +102,9 @@ export function ModeMenu({ currentMode, completions, onSelectMode }: ModeMenuPro
                       role="menuitem"
                       aria-current={isCurrent ? 'true' : undefined}
                     >
-                      <span className="mode-menu__item-icon">{config.icon}</span>
+                      <span className="mode-menu__item-icon">
+                        <i className={config.icon} aria-hidden="true"></i>
+                      </span>
                       <div className="mode-menu__item-info">
                         <span className="mode-menu__item-name">{config.name}</span>
                         <span className="mode-menu__item-desc">{config.description}</span>

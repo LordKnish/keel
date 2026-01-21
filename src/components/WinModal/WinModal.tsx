@@ -96,6 +96,12 @@ export function WinModal({
     window.open(fbUrl, '_blank', 'noopener,noreferrer');
   }, [generateShareText]);
 
+  const handleShareToWhatsApp = useCallback(() => {
+    const shareText = generateShareText();
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  }, [generateShareText]);
+
   if (!isOpen) return null;
 
   // Display class name as primary with ship name in parentheses
@@ -143,29 +149,45 @@ export function WinModal({
               className="win-modal__share-button"
               onClick={handleCopy}
               type="button"
+              aria-label={copied ? 'Copied' : 'Copy to clipboard'}
             >
-              {copied ? '✓ Copied!' : 'Copy 📋'}
+              {copied ? (
+                <i className="fa-solid fa-check" aria-hidden="true" />
+              ) : (
+                <i className="fa-regular fa-copy" aria-hidden="true" />
+              )}
             </button>
             <button
               className="win-modal__share-button win-modal__share-button--x"
               onClick={handleShareToX}
               type="button"
+              aria-label="Share on X"
             >
-              Share on X
+              <i className="fa-brands fa-x-twitter" aria-hidden="true" />
             </button>
             <button
               className="win-modal__share-button win-modal__share-button--bluesky"
               onClick={handleShareToBluesky}
               type="button"
+              aria-label="Share on Bluesky"
             >
-              Share on Bluesky
+              <i className="fa-brands fa-bluesky" aria-hidden="true" />
             </button>
             <button
               className="win-modal__share-button win-modal__share-button--facebook"
               onClick={handleShareToFacebook}
               type="button"
+              aria-label="Share on Facebook"
             >
-              Share on Facebook
+              <i className="fa-brands fa-facebook-f" aria-hidden="true" />
+            </button>
+            <button
+              className="win-modal__share-button win-modal__share-button--whatsapp"
+              onClick={handleShareToWhatsApp}
+              type="button"
+              aria-label="Share on WhatsApp"
+            >
+              <i className="fa-brands fa-whatsapp" aria-hidden="true" />
             </button>
           </div>
 

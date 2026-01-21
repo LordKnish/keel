@@ -192,6 +192,19 @@
   text-align: center;
 }
 
+.mode-menu__item-icon i {
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
+}
+
+.mode-menu__item--current .mode-menu__item-icon i {
+  color: var(--color-focus);
+}
+
+.mode-menu__item--completed .mode-menu__item-icon i {
+  color: var(--color-success);
+}
+
 /* Mode info */
 .mode-menu__item-info {
   flex: 1;
