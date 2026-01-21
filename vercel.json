@@ -11,7 +11,7 @@
   "rewrites": [
     { "source": "/ww2", "destination": "/" },
     { "source": "/cold-war", "destination": "/" },
-    { "source": "/carrier", "destination": "/" },
+    { "source": "/amphibious", "destination": "/" },
     { "source": "/submarine", "destination": "/" },
     { "source": "/small-ships", "destination": "/" }
   ]

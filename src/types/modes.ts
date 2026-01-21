@@ -2,7 +2,7 @@
  * Game mode types for multi-mode support in the frontend.
  */
 
-export type GameModeId = 'main' | 'ww2' | 'coldwar' | 'carrier' | 'submarine' | 'coastguard';
+export type GameModeId = 'main' | 'ww2' | 'coldwar' | 'amphibious' | 'submarine' | 'coastguard';
 
 export interface GameModeConfig {
   id: GameModeId;
@@ -42,13 +42,13 @@ export const GAME_MODES: Record<GameModeId, GameModeConfig> = {
     dataFile: '/game-data-coldwar.json',
     path: '/cold-war',
   },
-  carrier: {
-    id: 'carrier',
-    name: 'Carrier',
-    description: 'Aircraft carriers only',
-    icon: '🛫',
-    dataFile: '/game-data-carrier.json',
-    path: '/carrier',
+  amphibious: {
+    id: 'amphibious',
+    name: 'Amphibious',
+    description: 'Amphibious assault ships',
+    icon: '🚁',
+    dataFile: '/game-data-amphibious.json',
+    path: '/amphibious',
   },
   submarine: {
     id: 'submarine',
@@ -71,12 +71,12 @@ export const GAME_MODES: Record<GameModeId, GameModeConfig> = {
 /**
  * All mode IDs in order.
  */
-export const ALL_MODE_IDS: GameModeId[] = ['main', 'ww2', 'coldwar', 'carrier', 'submarine', 'coastguard'];
+export const ALL_MODE_IDS: GameModeId[] = ['main', 'ww2', 'coldwar', 'amphibious', 'submarine', 'coastguard'];
 
 /**
  * Bonus mode IDs (excludes main).
  */
-export const BONUS_MODE_IDS: GameModeId[] = ['ww2', 'coldwar', 'carrier', 'submarine', 'coastguard'];
+export const BONUS_MODE_IDS: GameModeId[] = ['ww2', 'coldwar', 'amphibious', 'submarine', 'coastguard'];
 
 /**
  * Result of completing a mode.

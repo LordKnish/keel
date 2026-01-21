@@ -110,7 +110,7 @@ const CRON_SECRET = process.env.CRON_SECRET;
 // Game Mode Configuration
 // ============================================================================
 
-type GameModeId = 'main' | 'ww2' | 'coldwar' | 'carrier' | 'submarine' | 'coastguard';
+type GameModeId = 'main' | 'ww2' | 'coldwar' | 'amphibious' | 'submarine' | 'coastguard';
 
 interface ModeConfig {
   id: GameModeId;
@@ -142,12 +142,12 @@ const GAME_MODES: Record<GameModeId, ModeConfig> = {
     yearMax: 1991,
     shipTypes: ['Q174736', 'Q182531', 'Q17205', 'Q104843', 'Q161705', 'Q170013', 'Q2811'],
   },
-  carrier: {
-    id: 'carrier',
-    name: 'Aircraft Carrier',
+  amphibious: {
+    id: 'amphibious',
+    name: 'Amphibious',
     yearMin: null,
     yearMax: null,
-    shipTypes: ['Q17205'],
+    shipTypes: ['Q473932'],
   },
   submarine: {
     id: 'submarine',
@@ -165,8 +165,8 @@ const GAME_MODES: Record<GameModeId, ModeConfig> = {
   },
 };
 
-const ALL_MODE_IDS: GameModeId[] = ['main', 'ww2', 'coldwar', 'carrier', 'submarine', 'coastguard'];
-const BONUS_MODE_IDS: GameModeId[] = ['ww2', 'coldwar', 'carrier', 'submarine', 'coastguard'];
+const ALL_MODE_IDS: GameModeId[] = ['main', 'ww2', 'coldwar', 'amphibious', 'submarine', 'coastguard'];
+const BONUS_MODE_IDS: GameModeId[] = ['ww2', 'coldwar', 'amphibious', 'submarine', 'coastguard'];
 
 // Legacy constant for backward compatibility
 const SHIP_TYPES = GAME_MODES.main.shipTypes;
